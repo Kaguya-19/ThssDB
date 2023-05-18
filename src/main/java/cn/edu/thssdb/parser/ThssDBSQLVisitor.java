@@ -32,6 +32,11 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
   private Manager manager;
 
   @Override
+  public LogicalPlan visitQuitStmt(SQLParser.QuitStmtContext ctx) {
+    return new QuitPlan();
+  }
+
+  @Override
   public LogicalPlan visitCreateDbStmt(SQLParser.CreateDbStmtContext ctx) {
     return new CreateDatabasePlan(ctx.databaseName().getText());
   }
@@ -82,6 +87,8 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
   public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
     return new ShowTablePlan(ctx.databaseName().getText());
   }
+
+
 
 
 

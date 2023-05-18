@@ -4,12 +4,11 @@ import cn.edu.thssdb.Global;
 import cn.edu.thssdb.exception.DatabaseNotExistException;
 import cn.edu.thssdb.exception.DatabaseNotSelectedException;
 import cn.edu.thssdb.exception.DuplicateDatabaseException;
-import org.omg.CORBA.Any;
+import cn.edu.thssdb.plan.LogicalGenerator;
+import cn.edu.thssdb.plan.LogicalPlan;
+import cn.edu.thssdb.plan.impl.CreateDatabasePlan;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,9 +26,14 @@ public class Manager {
   private String loadedDatabase;
 
   public Manager() {
-    // TODO: recover from script file
     databases = new HashMap<>();
     loadedDatabase = null;
+    System.out.println("[DEBUG] " + "Recovering meta data");
+    recover();
+    System.out.println("[DEBUG] " + "Meta data recovered");
+    for(Database db: databases.values()) {
+      System.out.println(db.toString());
+    }
   }
 
   public boolean createDatabaseIfNotExists(String databaseName) {
@@ -38,7 +42,7 @@ public class Manager {
       databases.put(databaseName, database);
       System.out.println("[DEBUG] " + "Database created");
 
-      persist(null);
+//      persist(null);
 
       if (loadedDatabase == null) {
         switchDatabase(databaseName);
@@ -59,7 +63,7 @@ public class Manager {
     if(loadedDatabase.equals(databaseName))
       loadedDatabase = null;
     System.out.println("[DEBUG] " + "Database dropped");
-    persist(databaseName);
+//    persist(databaseName);
   }
 
   public void switchDatabase(String databaseName) {
@@ -88,12 +92,6 @@ public class Manager {
     Database db = databases.get(databaseName);
     if(db == null) throw new DatabaseNotExistException(databaseName);
     return db;
-  }
-
-  private static class ManagerHolder {
-    private static final Manager INSTANCE = new Manager();
-
-    private ManagerHolder() {}
   }
 
 //  TODO: should be called in savepoint
@@ -132,7 +130,6 @@ public class Manager {
       }
       writer.close();
       fos.close();
-
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -152,7 +149,43 @@ public class Manager {
     }
   }
 
-  public static String getManagerDataFilePath() {
-    return Global.DB_DIR + File.separator + "data" + File.separator;
+  private boolean recover() {
+//    restore meta data from persist data into memory
+    String scriptFilePath = Global.MANAGER_DIR.concat("manager.script");
+    try {
+      File scriptFile = new File(scriptFilePath);
+      if(scriptFile.exists()) {
+        FileInputStream fis = new FileInputStream(scriptFilePath);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+        String line;
+        while((line = reader.readLine()) != null) {
+          LogicalPlan plan = LogicalGenerator.generate(line);
+          String dbName = ((CreateDatabasePlan)plan).getDatabaseName();
+          createDatabaseIfNotExists(dbName);
+          if(!databases.get(dbName).recover()) {
+            // break down process and try to recover
+          }
+        }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false;
+    }
+    return true;
   }
+
+  public void saveState() {
+    persist(null);
+    for(Database db: databases.values()) {
+      db.saveState();
+    }
+  }
+
+
+  private static class ManagerHolder {
+    private static final Manager INSTANCE = new Manager();
+
+    private ManagerHolder() {}
+  }
+
 }

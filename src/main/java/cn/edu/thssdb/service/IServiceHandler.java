@@ -65,6 +65,11 @@ public class IServiceHandler implements IService.Iface {
     System.out.println("[DEBUG] " + plan);
     try {
       switch (plan.getType()) {
+        case QUIT:
+          manager.saveState();
+          msg = ((QuitPlan)plan).toString();
+          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+
         case CREATE_DB:
           name = ((CreateDatabasePlan)plan).getDatabaseName();
           msg = "Database " + name + " is created.";
@@ -92,6 +97,7 @@ public class IServiceHandler implements IService.Iface {
           return new ExecuteStatementResp(StatusUtil.success(msg), false);
 
         case DROP_TABLE:
+          System.out.println("show table");
           name = ((DropTablePlan)plan).getTableName();
           msg = "Table " + name + " is dropped.";
           manager.getCurrentDatabase().drop(name);

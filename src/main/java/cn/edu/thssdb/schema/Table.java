@@ -70,4 +70,13 @@ public class Table implements Iterable<Row> {
   public Iterator<Row> iterator() {
     return new TableIterator(this);
   }
+
+  @Override
+  public String toString() {
+    String buffer = "\t" + tableName;
+    for(Column column: columns) {
+      buffer = buffer.concat("\n\t\t" + column.toString());
+    }
+    return buffer;
+  }
 }
