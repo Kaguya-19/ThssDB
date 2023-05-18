@@ -4,11 +4,15 @@ import cn.edu.thssdb.Global;
 import cn.edu.thssdb.exception.DatabaseNotExistException;
 import cn.edu.thssdb.exception.DatabaseNotSelectedException;
 import cn.edu.thssdb.exception.DuplicateDatabaseException;
+import org.omg.CORBA.Any;
 
-import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -23,7 +27,7 @@ public class Manager {
   private String loadedDatabase;
 
   public Manager() {
-    // TODO
+    // TODO: recover from script file
     databases = new HashMap<>();
     loadedDatabase = null;
   }
@@ -33,6 +37,9 @@ public class Manager {
       Database database = new Database(databaseName);
       databases.put(databaseName, database);
       System.out.println("[DEBUG] " + "Database created");
+
+      persist(null);
+
       if (loadedDatabase == null) {
         switchDatabase(databaseName);
         return true;
@@ -52,8 +59,7 @@ public class Manager {
     if(loadedDatabase.equals(databaseName))
       loadedDatabase = null;
     System.out.println("[DEBUG] " + "Database dropped");
-    // remove file of database
-//    this.persist();
+    persist(databaseName);
   }
 
   public void switchDatabase(String databaseName) {
@@ -90,23 +96,63 @@ public class Manager {
     private ManagerHolder() {}
   }
 
-  private void persist() {
-    // overwrite every single time when modified, to be improved
-    String filename = getManagerDataFile();
+//  TODO: should be called in savepoint
+  private void persist(String delDB) {
+    if(delDB != null && !delDB.isEmpty()) {
+      removeDatabaseDir(delDB);
+    } else {
+//      System.out.println("No db is dropped.");
+    }
+    // update manager.script
+    String scriptFilePath = Global.MANAGER_DIR.concat("manager.script");
     try {
-      FileOutputStream fos = new FileOutputStream(filename);
+      File scriptFile = new File(scriptFilePath);
+      if(scriptFile.exists()) {
+        scriptFile.delete();
+      }
+      scriptFile.createNewFile();
+
+      FileOutputStream fos = new FileOutputStream(scriptFilePath);
       OutputStreamWriter writer = new OutputStreamWriter(fos);
-      for(String databaseName: databases.keySet()) {
-        writer.write(databaseName+'\n');
+      // only add current db
+      for(String db: databases.keySet()) {
+        writer.write("create database ".concat(db + "\n"));
+        // create a folder for database
+        String dirPath = Global.MANAGER_DIR.concat(db);
+        File dir = new File(dirPath);
+        if(dir.exists()) {
+//          System.out.println("Database folder created.");
+        } else {
+          dir.mkdirs();
+        }
+        // create empty .script file
+        String dbScriptFile = Global.MANAGER_DIR.concat(db + File.separator + db + ".script");
+        File dbScript = new File(dbScriptFile);
+        if(!dbScript.exists()) dbScript.createNewFile();
       }
       writer.close();
       fos.close();
-    } catch (Exception e) {
-      // TODO: throw exception
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
-  public static String getManagerDataFile() {
-    return Global.DB_DIR + File.separator + "Manager";
+  private void removeDatabaseDir(String databaseName) {
+    String folderPath = Global.MANAGER_DIR.concat(databaseName);
+    try {
+      Path directory = Paths.get(folderPath);
+      Files.walk(directory)
+              .sorted(java.util.Comparator.reverseOrder())
+              .map(Path::toFile)
+              .forEach(File::delete);
+      System.out.println("Folder and its contents deleted successfully.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static String getManagerDataFilePath() {
+    return Global.DB_DIR + File.separator + "data" + File.separator;
   }
 }

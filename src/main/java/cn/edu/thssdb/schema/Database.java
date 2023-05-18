@@ -1,18 +1,21 @@
 package cn.edu.thssdb.schema;
 
+import cn.edu.thssdb.Global;
 import cn.edu.thssdb.exception.DuplicateTableException;
 import cn.edu.thssdb.exception.TableNotExistException;
 import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.query.QueryTable;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Database {
 
-  private String databaseName;
+  private String databaseName;// check legal name
   private HashMap<String, Table> tables;
   ReentrantReadWriteLock lock;
 
@@ -23,21 +26,44 @@ public class Database {
 //    recover();
   }
 
-  private void persist() {
-    // TODO
-    String filename = "thssdb/data/test_meta";
+  private void persist(String delTable) {
+
+    if(delTable != null && !delTable.isEmpty()) {
+//      removeTableFile(delTable);
+    } else {
+      System.out.println("No table is dropped.");
+    }
+    // update manager.script
+    String scriptFilePath = Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
     try {
-      FileOutputStream fos = new FileOutputStream(filename);
+      File scriptFile = new File(scriptFilePath);
+      if(scriptFile.exists()) {
+        scriptFile.delete();
+      }
+      scriptFile.createNewFile();
+
+      FileOutputStream fos = new FileOutputStream(scriptFilePath);
       OutputStreamWriter writer = new OutputStreamWriter(fos);
-      for (Table table : tables.values()) {
-        for (Column column : table.columns) {
-          writer.write(column.toString()+'\n');
+      // only add current db
+      for(String tableName: tables.keySet()) {
+        Table table = tables.get(tableName);
+        String buffer = "CREATE TABLE ".concat(tableName + '(');
+        String primary = "";
+        for(Column column: table.columns) {
+          if(column.isPrimary()) primary = column.getName();
+          buffer = buffer.concat(column.toCommand() + ',');
         }
+        buffer = buffer.concat(Column.toPrimary(primary));
+        buffer = buffer.concat(")\n");
+        System.out.println("[DEBUG] " + buffer);
+        writer.write(buffer);
+        // TODO: create or modify table file
       }
       writer.close();
       fos.close();
-    } catch (Exception e) {
-      // TODO: throw exception
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -49,6 +75,7 @@ public class Database {
     Table table = new Table(this.databaseName, tableName, columns);
     tables.put(tableName, table);
     System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
+    persist(null);
   }
 
   // Drop table.
@@ -58,6 +85,7 @@ public class Database {
     }
     tables.remove(tableName);
     System.out.println("[DEBUG] " + "Table " + tableName + " is dropped.");
+    persist(tableName);
   }
 
   public String select(QueryTable[] queryTables) {
@@ -74,7 +102,7 @@ public class Database {
     // if existed, recover
 
     // if not, create one
-    this.persist();
+//    this.persist();
 
   }
 
