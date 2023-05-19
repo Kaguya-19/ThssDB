@@ -4,6 +4,7 @@ import cn.edu.thssdb.index.BPlusTree;
 import cn.edu.thssdb.utils.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,6 +17,9 @@ public class Table implements Iterable<Row> {
   private int primaryIndex;
 
   public Table(String databaseName, String tableName, Column[] columns) {
+    this.databaseName = databaseName;
+    this.tableName = tableName;
+    this.columns = new ArrayList<>(Arrays.asList(columns));
     // TODO
   }
 
@@ -65,5 +69,14 @@ public class Table implements Iterable<Row> {
   @Override
   public Iterator<Row> iterator() {
     return new TableIterator(this);
+  }
+
+  @Override
+  public String toString() {
+    String buffer = "\t" + tableName;
+    for(Column column: columns) {
+      buffer = buffer.concat("\n\t\t" + column.toString());
+    }
+    return buffer;
   }
 }
