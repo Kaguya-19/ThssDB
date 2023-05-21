@@ -61,12 +61,6 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCreateTableStmt(SQLParser.CreateTableStmtContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link SQLParser#showMetaStmt}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitShowMetaStmt(SQLParser.ShowMetaStmtContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link SQLParser#grantStmt}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -132,6 +126,18 @@ public interface SQLVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitSelectStmt(SQLParser.SelectStmtContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#selectElements}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSelectElements(SQLParser.SelectElementsContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#tableQueries}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTableQueries(SQLParser.TableQueriesContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link SQLParser#createViewStmt}.
 	 * @param ctx the parse tree

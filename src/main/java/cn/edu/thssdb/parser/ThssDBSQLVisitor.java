@@ -24,7 +24,6 @@ import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.sql.SQLBaseVisitor;
 import cn.edu.thssdb.sql.SQLParser;
-import org.apache.commons.logging.Log;
 
 import java.util.ArrayList;
 
@@ -83,14 +82,120 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
     return new DropTablePlan(ctx.tableName().getText());
   }
 
-  @Override
-  public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
-    return new ShowTablePlan(ctx.databaseName().getText());
-  }
+  //  @Override
+  //  public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
+  //    return new ShowTablePlan(ctx.databaseName().getText());
+  //  }
 
-
-
-
-
+  //  @Override
+  //  public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
+  //    ArrayList<ColumnFullName> columnFullNames = (ArrayList<ColumnFullName>)
+  // visit(ctx.selectElements());
+  //    ArrayList<TableQuery> tableQueries = (ArrayList<TableQuery>) visit(ctx.tableQueries());
+  //    ArrayList<Condition> conditions = (ArrayList<Condition>) visit(ctx.multipleCondition());
+  //    return new SelectPlan(columnFullNames, tableQueries, conditions);
+  //  }
+  //
+  //  @Override
+  //  public ArrayList<ColumnFullName> visitSelectElements(SQLParser.SelectElementsContext ctx) {
+  //    ArrayList<ColumnFullName> columnFullNames = new ArrayList<>();
+  //    for (SQLParser.ResultColumnContext context : ctx.resultColumn()) {
+  //      columnFullNames.add((ColumnFullName) visit(context));
+  //    }
+  //    return columnFullNames;
+  //  }
+  //
+  //  @Override
+  //  public ColumnFullName visitResultColumn(SQLParser.ResultColumnContext ctx) {
+  //    if (ctx.getChildCount() == 1) {
+  //      return new ColumnFullName(ctx.getChild(0).getText());
+  //    } else { // tableName '.' columnName or '*'
+  //      return new ColumnFullName(ctx.getChild(2).getText(), ctx.getChild(0).getText());
+  //    }
+  //  }
+  //
+  //  @Override
+  //  public ArrayList<TableQuery> visitTableQueries(SQLParser.TableQueriesContext ctx) {
+  //    ArrayList<TableQuery> tableQueries = new ArrayList<>();
+  //    for (SQLParser.TableQueryContext context : ctx.tableQuery()) {
+  //      tableQueries.add((TableQuery) visit(context));
+  //    }
+  //    return tableQueries;
+  //  }
+  //
+  //  @Override
+  //  public TableQuery visitTableQuery(SQLParser.TableQueryContext ctx) {
+  //    // if (ctx.getChildCount() == 1) {
+  //    return new TableQuery(ctx.tableName().getText());
+  //    // } else { //TODO:Join
+  //    //   return new TableQuery(ctx.tableName().getText(), ctx.getChild(2).getText());
+  //    // }
+  //  }
+  //
+  //  @Override
+  //  public ArrayList<String> visitMultipleCondition(SQLParser.MultipleConditionContext ctx) {
+  //    ArrayList<Condition> conditions = new ArrayList<>();
+  //    // if (ctx.getChildCount() == 1){
+  //    conditions.add((Condition) visit(ctx.getChild(0)));
+  //    return conditions;
+  //    // }
+  //    // else {
+  //    //   //TODO: calculate || and &&
+  //
+  //    // }
+  //  }
+  //
+  //  @Override
+  //  public Object visitCondition(SQLParser.ConditionContext ctx) {
+  //    return Condition(visit(ctx.comparer(0)), visit(ctx.comparer(1)), ctx.getChild(1).getText());
+  //  }
+  //
+  //  @Override
+  //  public Object visitExpression(SQLParser.ExpressionContext ctx) {
+  //    return super.visitExpression(ctx);
+  //    // TODO: complex expression
+  //  }
+  //
+  //  @Override
+  //  public Object visitComparer(SQLParser.ComparerContext ctx) {
+  //    if (ctx.getChild(0) instanceof SQLParser.ColumnFullNameContext) {
+  //      return visit(ctx.getChild(0)); // columnFullName
+  //    } else {
+  //      return ctx.getChild(0).getText(); // literalValue
+  //    }
+  //  }
+  //
+  //  @Override
+  //  public String visitTableName(SQLParser.TableNameContext ctx) {
+  //    return ctx.getChild(0).getText().toUpperCase();
+  //    // IDENTIFIER
+  //  }
+  //
+  //  @Override
+  //  public String visitColumnName(SQLParser.ColumnNameContext ctx) {
+  //    return ctx.getChild(0).getText().toUpperCase();
+  //    // IDENTIFIER
+  //  }
+  //
+  //  @Override
+  //  public String visitLiteralValue(SQLParser.LiteralValueContext ctx) {
+  //    return ctx.getChild(0).getText();
+  //    // NUMERIC_LITERAL | STRING_LITERAL | K_NULL
+  //  }
+  //
+  //  @Override
+  //  public String visitDatabaseName(SQLParser.DatabaseNameContext ctx) {
+  //    return ctx.getChild(0).getText().toUpperCase();
+  //    // IDENTIFIER
+  //  }
+  //
+  //  @Override
+  //  public ColumnFullName visitColumnFullName(SQLParser.ColumnFullNameContext ctx) {
+  //    if (ctx.getChildCount() > 1) {
+  //      return new ColumnFullName(ctx.columnName().getText(), ctx.tableName().getText());
+  //    } else {
+  //      return new ColumnFullName(ctx.columnName().getText());
+  //    }
+  //  }
   // TODO: parser to more logical plan
 }

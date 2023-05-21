@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Database {
 
-  private String databaseName;// check legal name
+  private String databaseName; // check legal name
   private HashMap<String, Table> tables;
   ReentrantReadWriteLock lock;
 
@@ -23,12 +23,12 @@ public class Database {
     this.databaseName = databaseName;
     this.tables = new HashMap<>();
     this.lock = new ReentrantReadWriteLock();
-//    recover();
+    //    recover();
   }
 
   // Create table.
   public void create(String tableName, Column[] columns) {
-    if(tables.containsKey(tableName)) {
+    if (tables.containsKey(tableName)) {
       throw new DuplicateTableException(tableName);
     }
     Table table = new Table(this.databaseName, tableName, columns);
@@ -38,7 +38,7 @@ public class Database {
 
   // Drop table.
   public void drop(String tableName) {
-    if(!tables.containsKey(tableName)) {
+    if (!tables.containsKey(tableName)) {
       throw new TableNotExistException(tableName);
     }
     tables.remove(tableName);
@@ -56,10 +56,9 @@ public class Database {
     System.out.println("[DEBUG] " + "Table count: " + tables.values().size());
     int i = 0;
     int n = tables.values().size() - 2;
-    for(Table table: tables.values()) {
+    for (Table table : tables.values()) {
       tableNameList = tableNameList.concat(table.tableName);
-      if(i < n)
-        tableNameList = tableNameList + ", ";
+      if (i < n) tableNameList = tableNameList + ", ";
     }
     if (tableNameList.length() == 0) {
       return "No tables.";
@@ -71,20 +70,20 @@ public class Database {
     persist(null);
   }
 
-
   private void persist(String delTable) {
 
-    if(delTable != null && !delTable.isEmpty()) {
-//      removeTableFile(delTable);
+    if (delTable != null && !delTable.isEmpty()) {
+      //      removeTableFile(delTable);
     } else {
       System.out.println("No table is dropped.");
     }
 
     // update manager.script
-    String scriptFilePath = Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
+    String scriptFilePath =
+        Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
     try {
       File scriptFile = new File(scriptFilePath);
-      if(scriptFile.exists()) {
+      if (scriptFile.exists()) {
         scriptFile.delete();
       }
       scriptFile.createNewFile();
@@ -92,12 +91,12 @@ public class Database {
       // update table properties
       FileOutputStream fos = new FileOutputStream(scriptFilePath);
       OutputStreamWriter writer = new OutputStreamWriter(fos);
-      for(String tableName: tables.keySet()) {
+      for (String tableName : tables.keySet()) {
         Table table = tables.get(tableName);
         String buffer = "CREATE TABLE ".concat(tableName + '(');
         String primary = "";
-        for(Column column: table.columns) {
-          if(column.isPrimary()) primary = column.getName();
+        for (Column column : table.columns) {
+          if (column.isPrimary()) primary = column.getName();
           buffer = buffer.concat(column.toCommand() + ',');
         }
         buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
@@ -113,18 +112,19 @@ public class Database {
   }
 
   public boolean recover() {
-    String scriptFilePath = Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
+    String scriptFilePath =
+        Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
     try {
       File scriptFile = new File(scriptFilePath);
-      if(scriptFile.exists()) {
+      if (scriptFile.exists()) {
         FileInputStream fis = new FileInputStream(scriptFilePath);
         BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
         String line;
-        while((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) != null) {
           System.out.println(line);
           LogicalPlan plan = LogicalGenerator.generate(line);
-          String tableName = ((CreateTablePlan)plan).getTableName();
-          create(tableName, ((CreateTablePlan)plan).getColumns().toArray(new Column[0]));
+          String tableName = ((CreateTablePlan) plan).getTableName();
+          create(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]));
         }
       }
     } catch (Exception e) {
@@ -134,15 +134,16 @@ public class Database {
     return true;
   }
 
-  public String getDatabaseName() { return databaseName; }
+  public String getDatabaseName() {
+    return databaseName;
+  }
 
   @Override
   public String toString() {
     String buffer = databaseName + '\n';
-    for (Table table: tables.values()) {
+    for (Table table : tables.values()) {
       buffer = buffer.concat(table.toString() + '\n');
     }
     return buffer;
   }
-
 }

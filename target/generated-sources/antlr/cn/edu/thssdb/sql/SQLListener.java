@@ -90,16 +90,6 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitCreateTableStmt(SQLParser.CreateTableStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#showMetaStmt}.
-	 * @param ctx the parse tree
-	 */
-	void enterShowMetaStmt(SQLParser.ShowMetaStmtContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#showMetaStmt}.
-	 * @param ctx the parse tree
-	 */
-	void exitShowMetaStmt(SQLParser.ShowMetaStmtContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLParser#grantStmt}.
 	 * @param ctx the parse tree
 	 */
@@ -209,6 +199,26 @@ public interface SQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitSelectStmt(SQLParser.SelectStmtContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#selectElements}.
+	 * @param ctx the parse tree
+	 */
+	void enterSelectElements(SQLParser.SelectElementsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#selectElements}.
+	 * @param ctx the parse tree
+	 */
+	void exitSelectElements(SQLParser.SelectElementsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#tableQueries}.
+	 * @param ctx the parse tree
+	 */
+	void enterTableQueries(SQLParser.TableQueriesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#tableQueries}.
+	 * @param ctx the parse tree
+	 */
+	void exitTableQueries(SQLParser.TableQueriesContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link SQLParser#createViewStmt}.
 	 * @param ctx the parse tree

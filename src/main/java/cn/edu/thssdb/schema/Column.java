@@ -22,9 +22,17 @@ public class Column implements Comparable<Column> {
     return name.compareTo(e.name);
   }
 
-  public String getName() { return name; }
-  public void setPrimary(int primary) { this.primary = primary; }
-  public boolean isPrimary() { return primary == 1; }
+  public String getName() {
+    return name;
+  }
+
+  public void setPrimary(int primary) {
+    this.primary = primary;
+  }
+
+  public boolean isPrimary() {
+    return primary == 1;
+  }
 
   public static ColumnType getType(String type) {
     type = type.toUpperCase();
@@ -47,14 +55,16 @@ public class Column implements Comparable<Column> {
   public String toString() {
     return name + ',' + type + ',' + primary + ',' + notNull + ',' + maxLength;
   }
+
   public String toCommand() {
     String buffer = name + " " + type.name();
-    if(type == ColumnType.STRING) {
+    if (type == ColumnType.STRING) {
       buffer = buffer.concat("(" + maxLength + ")");
     }
-    if(notNull) buffer = buffer.concat(" NOT NULL");
+    if (notNull) buffer = buffer.concat(" NOT NULL");
     return buffer;
   }
+
   public static String toPrimary(String columnName) {
     return !columnName.isEmpty() ? "PRIMARY KEY (" + columnName + ")" : "";
   }

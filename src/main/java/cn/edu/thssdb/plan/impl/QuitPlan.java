@@ -22,12 +22,12 @@ import cn.edu.thssdb.plan.LogicalPlan;
 
 public class QuitPlan extends LogicalPlan {
 
-    public QuitPlan() {
-        super(LogicalPlanType.QUIT);
-    }
+  public QuitPlan() {
+    super(LogicalPlanType.QUIT);
+  }
 
-    @Override
-    public String toString() {
-        return "Quit, state saved.";
-    }
+  @Override
+  public String toString() {
+    return "Quit, state saved.";
+  }
 }
