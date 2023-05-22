@@ -92,9 +92,10 @@ public class IServiceHandler implements IService.Iface {
         case CREATE_TABLE:
           name = ((CreateTablePlan) plan).getTableName();
           msg = "Table " + name + " is created.";
+          int pk = ((CreateTablePlan) plan).getPrimary();
           manager
               .getCurrentDatabase()
-              .create(name, ((CreateTablePlan) plan).getColumns().toArray(new Column[0])); // ??
+              .create(name, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk); // ??
           return new ExecuteStatementResp(StatusUtil.success(msg), false);
 
         case DROP_TABLE:

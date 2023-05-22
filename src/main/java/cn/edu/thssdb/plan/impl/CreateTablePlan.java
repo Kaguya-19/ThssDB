@@ -9,10 +9,13 @@ public class CreateTablePlan extends LogicalPlan {
   private String tableName;
   private ArrayList<Column> columns;
 
-  public CreateTablePlan(String tableName, ArrayList<Column> columns) {
+  private int primary;
+
+  public CreateTablePlan(String tableName, ArrayList<Column> columns, int primary) {
     super(LogicalPlanType.CREATE_TABLE);
     this.tableName = tableName;
     this.columns = new ArrayList<>(columns);
+    this.primary = primary;
   }
 
   @Override
@@ -30,5 +33,9 @@ public class CreateTablePlan extends LogicalPlan {
 
   public ArrayList<Column> getColumns() {
     return columns;
+  }
+
+  public int getPrimary() {
+    return primary;
   }
 }

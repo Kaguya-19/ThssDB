@@ -1,16 +1,16 @@
 package cn.edu.thssdb.parser;
 
 public class BinaryTree {
-  protected BinaryTree left;
-  protected BinaryTree right;
-  protected Object value;
-  protected BinaryTree root;
+  protected BinaryTree left = null;
+  protected BinaryTree right = null;
+  protected Object value = null;
+  //  protected BinaryTree root = null;
 
   public BinaryTree(BinaryTree left, BinaryTree right, Object value) {
     this.left = left;
     this.right = right;
     this.value = value;
-    this.root = new BinaryTree(left.root, right.root, value);
+    //    this.root = new BinaryTree(left.root, right.root, value);
   }
 
   public void postOrderTraverse() {

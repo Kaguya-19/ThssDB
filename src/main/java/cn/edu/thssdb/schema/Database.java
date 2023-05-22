@@ -27,12 +27,12 @@ public class Database {
   }
 
   // Create table.
-  public void create(String tableName, Column[] columns) {
+  public void create(String tableName, Column[] columns, int primaryIndex) {
     if (tables.containsKey(tableName)) {
       // Duplicate table name.
       throw new DuplicateTableException(tableName);
     }
-    Table table = new Table(this.databaseName, tableName, columns);
+    Table table = new Table(this.databaseName, tableName, columns, primaryIndex);
     tables.put(tableName, table);
     System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
   }
@@ -132,7 +132,8 @@ public class Database {
           System.out.println(line);
           LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String tableName = ((CreateTablePlan) plan).getTableName();
-          create(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]));
+          int pk = ((CreateTablePlan) plan).getPrimary();
+          create(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk);
         }
       }
     } catch (Exception e) {

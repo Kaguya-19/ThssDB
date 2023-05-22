@@ -68,13 +68,14 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
       columnName.add(name);
     }
     // only one primary key, so the efficiency is considerable
+    int primary = 0;
     if (ctx.tableConstraint() != null) {
       for (SQLParser.ColumnNameContext context : ctx.tableConstraint().columnName()) {
         String name = context.getChild(0).toString();
-        columns.get(columnName.indexOf(name)).setPrimary(1);
+        primary = columnName.indexOf(name);
       }
     }
-    return new CreateTablePlan(ctx.tableName().getText(), columns);
+    return new CreateTablePlan(ctx.tableName().getText(), columns, primary);
   }
 
   @Override
@@ -90,16 +91,18 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public LogicalPlan visitInsertStmt(SQLParser.InsertStmtContext ctx) {
     ArrayList<String> columnNames = new ArrayList<>();
-    ArrayList<String> values = new ArrayList<>();
+    ArrayList<ArrayList<String>> valuess = new ArrayList<>();
     for (SQLParser.ColumnNameContext context : ctx.columnName()) {
       columnNames.add(context.getText());
     }
     for (SQLParser.ValueEntryContext context : ctx.valueEntry()) {
+      ArrayList<String> values = new ArrayList<>();
       for (SQLParser.LiteralValueContext context1 : context.literalValue()) {
         values.add(context1.getText());
       }
+      valuess.add(values);
     }
-    return new InsertPlan(ctx.tableName().getText(), columnNames, values);
+    return new InsertPlan(ctx.tableName().getText(), columnNames, valuess);
   }
 
   @Override
@@ -118,48 +121,39 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
     return new UpdatePlan(ctx.tableName().getText(), columnName, value, multipleConditions);
   }
 
-  //    @Override
-  //    public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
+  @Override
+  public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
+    MultipleConditions conditions = (MultipleConditions) visit(ctx.multipleCondition());
+    ArrayList<ColumnFullName> resultColumns = new ArrayList<>();
+    ArrayList<TableQuery> tableQueries = new ArrayList<>();
+    for (SQLParser.ResultColumnContext context : ctx.resultColumn()) {
+      resultColumns.add((ColumnFullName) visit(context));
+    }
+    for (SQLParser.TableQueryContext context : ctx.tableQuery()) {
+      tableQueries.add((TableQuery) visit(context));
+    }
+    return new SelectPlan(resultColumns, tableQueries, conditions);
+  }
+
+  @Override
+  public ColumnFullName visitResultColumn(SQLParser.ResultColumnContext ctx) {
+    if (ctx.getChildCount() == 1) {
+      return new ColumnFullName(ctx.getChild(0).getText(), null);
+    } else { // tableName '.' columnName or '*'
+      return new ColumnFullName(ctx.getChild(2).getText(), ctx.getChild(0).getText());
+    }
+  }
   //
-  ////      return new SelectPlan(columnFullNames, tableQueries, conditions);
-  //    }
   //
-  //  @Override
-  //  public ArrayList<ColumnFullName> visitSelectElements(SQLParser.SelectElementsContext ctx) {
-  //    ArrayList<ColumnFullName> columnFullNames = new ArrayList<>();
-  //    for (SQLParser.ResultColumnContext context : ctx.resultColumn()) {
-  //      columnFullNames.add((ColumnFullName) visit(context));
-  //    }
-  //    return columnFullNames;
-  //  }
-  //
-  //  @Override
-  //  public ColumnFullName visitResultColumn(SQLParser.ResultColumnContext ctx) {
-  //    if (ctx.getChildCount() == 1) {
-  //      return new ColumnFullName(ctx.getChild(0).getText());
-  //    } else { // tableName '.' columnName or '*'
-  //      return new ColumnFullName(ctx.getChild(2).getText(), ctx.getChild(0).getText());
-  //    }
-  //  }
-  //
-  //  @Override
-  //  public ArrayList<TableQuery> visitTableQueries(SQLParser.TableQueriesContext ctx) {
-  //    ArrayList<TableQuery> tableQueries = new ArrayList<>();
-  //    for (SQLParser.TableQueryContext context : ctx.tableQuery()) {
-  //      tableQueries.add((TableQuery) visit(context));
-  //    }
-  //    return tableQueries;
-  //  }
-  //
-  //  @Override
-  //  public TableQuery visitTableQuery(SQLParser.TableQueryContext ctx) {
-  //    // if (ctx.getChildCount() == 1) {
-  //    return new TableQuery(ctx.tableName().getText());
-  //    // } else { //TODO:Join
-  //    //   return new TableQuery(ctx.tableName().getText(), ctx.getChild(2).getText());
-  //    // }
-  //  }
-  //
+  @Override
+  public TableQuery visitTableQuery(SQLParser.TableQueryContext ctx) {
+    //       if (ctx.getChildCount() == 1) {
+    return new TableQuery(ctx.tableName(0).getText());
+    //       } else { //TODO:tableName ( K_JOIN tableName )+ K_ON multipleCondition
+    //
+    //          }
+  }
+
   @Override
   public MultipleConditions visitMultipleCondition(SQLParser.MultipleConditionContext ctx) {
     // tree from root
@@ -175,57 +169,67 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
     return root;
   }
   //
-  //  @Override
-  //  public Object visitCondition(SQLParser.ConditionContext ctx) {
-  //    return Condition(visit(ctx.comparer(0)), visit(ctx.comparer(1)), ctx.getChild(1).getText());
-  //  }
+  @Override
+  public Object visitCondition(SQLParser.ConditionContext ctx) {
+    if (visit(ctx.expression(0)) instanceof ColumnFullName) {
+      return new Condition(
+          (ColumnFullName) visit(ctx.expression(0)),
+          visit(ctx.expression(1)),
+          ctx.getChild(1).getText());
+    } else {
+      return new Condition(
+          (ColumnFullName) visit(ctx.expression(0)),
+          visit(ctx.expression(1)),
+          ctx.getChild(1).getText());
+    }
+  }
   //
-  //  @Override
-  //  public Object visitExpression(SQLParser.ExpressionContext ctx) {
-  //    return super.visitExpression(ctx);
-  //    // TODO: complex expression
-  //  }
+  @Override
+  public Object visitExpression(SQLParser.ExpressionContext ctx) {
+    return super.visitExpression(ctx);
+    // TODO: complex expression
+  }
   //
-  //  @Override
-  //  public Object visitComparer(SQLParser.ComparerContext ctx) {
-  //    if (ctx.getChild(0) instanceof SQLParser.ColumnFullNameContext) {
-  //      return visit(ctx.getChild(0)); // columnFullName
-  //    } else {
-  //      return ctx.getChild(0).getText(); // literalValue
-  //    }
-  //  }
+  @Override
+  public Object visitComparer(SQLParser.ComparerContext ctx) {
+    if (ctx.getChild(0) instanceof SQLParser.ColumnFullNameContext) {
+      return visit(ctx.getChild(0)); // columnFullName
+    } else {
+      return ctx.getChild(0).getText(); // literalValue
+    }
+  }
   //
-  //  @Override
-  //  public String visitTableName(SQLParser.TableNameContext ctx) {
-  //    return ctx.getChild(0).getText().toUpperCase();
-  //    // IDENTIFIER
-  //  }
+  @Override
+  public String visitTableName(SQLParser.TableNameContext ctx) {
+    return ctx.getChild(0).getText().toUpperCase();
+    // IDENTIFIER
+  }
   //
-  //  @Override
-  //  public String visitColumnName(SQLParser.ColumnNameContext ctx) {
-  //    return ctx.getChild(0).getText().toUpperCase();
-  //    // IDENTIFIER
-  //  }
+  @Override
+  public String visitColumnName(SQLParser.ColumnNameContext ctx) {
+    return ctx.getChild(0).getText().toUpperCase();
+    // IDENTIFIER
+  }
+
+  @Override
+  public String visitLiteralValue(SQLParser.LiteralValueContext ctx) {
+    return ctx.getChild(0).getText();
+    // NUMERIC_LITERAL | STRING_LITERAL | K_NULL
+  }
+
+  @Override
+  public String visitDatabaseName(SQLParser.DatabaseNameContext ctx) {
+    return ctx.getChild(0).getText().toUpperCase();
+    // IDENTIFIER
+  }
   //
-  //  @Override
-  //  public String visitLiteralValue(SQLParser.LiteralValueContext ctx) {
-  //    return ctx.getChild(0).getText();
-  //    // NUMERIC_LITERAL | STRING_LITERAL | K_NULL
-  //  }
-  //
-  //  @Override
-  //  public String visitDatabaseName(SQLParser.DatabaseNameContext ctx) {
-  //    return ctx.getChild(0).getText().toUpperCase();
-  //    // IDENTIFIER
-  //  }
-  //
-  //  @Override
-  //  public ColumnFullName visitColumnFullName(SQLParser.ColumnFullNameContext ctx) {
-  //    if (ctx.getChildCount() > 1) {
-  //      return new ColumnFullName(ctx.columnName().getText(), ctx.tableName().getText());
-  //    } else {
-  //      return new ColumnFullName(ctx.columnName().getText());
-  //    }
-  //  }
+  @Override
+  public ColumnFullName visitColumnFullName(SQLParser.ColumnFullNameContext ctx) {
+    if (ctx.getChildCount() > 1) {
+      return new ColumnFullName(ctx.columnName().getText(), ctx.tableName().getText());
+    } else {
+      return new ColumnFullName(ctx.columnName().getText(), null);
+    }
+  }
   // TODO: parser to more logical plan
 }

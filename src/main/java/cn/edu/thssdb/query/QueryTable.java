@@ -1,6 +1,6 @@
 package cn.edu.thssdb.query;
 
-import cn.edu.thssdb.parser.Condition;
+import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 
@@ -13,25 +13,25 @@ public class QueryTable implements Iterator<Row> {
   Iterator<Row> iterator;
   private Table resultTable;
 
-  public QueryTable(ArrayList<Table> tables, ArrayList<Condition> conditions) {
+  public QueryTable(ArrayList<Table> tables, MultipleConditions conditions) {
     // TODO
     this.tables = tables;
     this.iterator = tables.get(0).iterator();
-    this.resultTable = new Table(null, null, null);
+    //    this.resultTable = new Table(null, null, null);
     //
-    for (Table table : tables) {
-      for (Row row : table) {
-        if (conditions == null) {
-          //          resultTable.insert(row);
-        } else {
-          for (Condition condition : conditions) {
-            if (condition.check(row, table)) {
-              //              resultTable.insert(row);
-            }
-          }
-        }
-      }
-    }
+    //    for (Table table : tables) {
+    //      for (Row row : table) {
+    //        if (conditions == null) {
+    //          //          resultTable.insert(row);
+    //        } else {
+    //          for (Condition condition : conditions) {
+    //            if (condition.check(row, table)) {
+    //              //              resultTable.insert(row);
+    //            }
+    //          }
+    //        }
+    //      }
+    //    }
   }
 
   @Override

@@ -16,15 +16,16 @@ public class Table implements Iterable<Row> {
   public String tableName;
   public ArrayList<Column> columns;
   public BPlusTree<Entry, Row> index;
-  private int primaryIndex;
+  private int primaryIndex = 0;
 
   private String tablePath;
 
-  public Table(String databaseName, String tableName, Column[] columns) {
+  public Table(String databaseName, String tableName, Column[] columns, int primaryIndex) {
     this.databaseName = databaseName;
     this.tableName = tableName;
     this.columns = new ArrayList<>(Arrays.asList(columns));
     this.index = new BPlusTree<>();
+    this.primaryIndex = primaryIndex;
     // TODO
     this.tablePath = Global.TABLE_DIR + databaseName + File.separator + tableName + ".table";
   }
@@ -56,9 +57,9 @@ public class Table implements Iterable<Row> {
   public void insert(Row row) {
     // TODO
     // check primary key
-    if (index.get(row.getEntries().get(primaryIndex)) != null) {
-      throw new RuntimeException("Primary Key Error");
-    }
+    //    if (index.get(row.getEntries().get(primaryIndex)) != null) {
+    //      throw new RuntimeException("Primary Key Error");
+    //    }
     index.put(row.getEntries().get(primaryIndex), row);
   }
 

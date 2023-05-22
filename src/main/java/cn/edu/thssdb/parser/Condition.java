@@ -5,7 +5,7 @@ import cn.edu.thssdb.schema.Table;
 
 public class Condition {
   private ColumnFullName c1;
-  private ColumnFullName c2;
+  private ColumnFullName c2 = null;
   private Object value;
   private String op;
 
