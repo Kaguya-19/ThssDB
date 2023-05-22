@@ -4,7 +4,9 @@ D:\Working\Program\Java\ThssDB\target\generated-sources\thrift\cn\edu\thssdb\rpc
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\LogicalPlan.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\exception\TableNotExistException.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\query\QueryResult.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\InsertPlan.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\CreateDatabasePlan.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\DeletePlan.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\client\Client.java
 D:\Working\Program\Java\ThssDB\target\generated-sources\antlr\cn\edu\thssdb\sql\SQLBaseListener.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\utils\Global.java
@@ -14,7 +16,10 @@ D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\exception\DuplicateTa
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\index\BPlusTreeInternalNode.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\schema\Column.java
 D:\Working\Program\Java\ThssDB\target\generated-sources\thrift\cn\edu\thssdb\rpc\thrift\ExecuteStatementResp.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\parser\Expressions.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\parser\MultipleConditions.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\parser\Condition.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\UpdatePlan.java
 D:\Working\Program\Java\ThssDB\target\generated-sources\thrift\cn\edu\thssdb\rpc\thrift\GetTimeResp.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\SelectPlan.java
 D:\Working\Program\Java\ThssDB\target\generated-sources\antlr\cn\edu\thssdb\sql\SQLBaseVisitor.java
@@ -46,6 +51,7 @@ D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\exception\DatabaseNot
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\schema\Database.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\exception\DuplicateKeyException.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\plan\impl\DropDatabasePlan.java
+D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\parser\BinaryTree.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\schema\Entry.java
 D:\Working\Program\Java\ThssDB\src\main\java\cn\edu\thssdb\Global.java
 D:\Working\Program\Java\ThssDB\target\generated-sources\thrift\cn\edu\thssdb\rpc\thrift\ConnectResp.java

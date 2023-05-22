@@ -25,7 +25,7 @@ public class QueryTable implements Iterator<Row> {
           //          resultTable.insert(row);
         } else {
           for (Condition condition : conditions) {
-            if (condition.check(row)) {
+            if (condition.check(row, table)) {
               //              resultTable.insert(row);
             }
           }

@@ -31,7 +31,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 public class LogicalGenerator {
 
-  public static LogicalPlan generate(String sql) throws ParseCancellationException {
+  public static Object generate(String sql) throws ParseCancellationException {
     ThssDBSQLVisitor dbsqlVisitor = new ThssDBSQLVisitor();
 
     CharStream charStream1 = CharStreams.fromString(sql);

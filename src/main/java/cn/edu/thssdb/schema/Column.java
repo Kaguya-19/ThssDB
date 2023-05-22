@@ -34,7 +34,7 @@ public class Column implements Comparable<Column> {
     return primary == 1;
   }
 
-  public static ColumnType getType(String type) {
+  public static ColumnType str2ColType(String type) {
     type = type.toUpperCase();
     switch (type) {
       case "INT":
@@ -50,6 +50,10 @@ public class Column implements Comparable<Column> {
       default:
         return null;
     }
+  }
+
+  public ColumnType getType() {
+    return type;
   }
 
   public String toString() {

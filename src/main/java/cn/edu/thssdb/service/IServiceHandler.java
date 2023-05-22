@@ -59,8 +59,9 @@ public class IServiceHandler implements IService.Iface {
           StatusUtil.fail("You are not connected. Please connect first."), false);
     }
     // TODO: implement execution logic
-    LogicalPlan plan = LogicalGenerator.generate(req.statement);
+    LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(req.statement);
     String name, msg;
+    boolean executeSuccess = false;
     System.out.println("[DEBUG] " + plan);
     try {
       switch (plan.getType()) {
@@ -104,9 +105,33 @@ public class IServiceHandler implements IService.Iface {
           return new ExecuteStatementResp(StatusUtil.success(msg), false);
 
         case SHOW_TABLE:
-          name = ((ShowTablePlan) plan).getDatabaseName();
+          name = ((ShowTablePlan) plan).getTableName();
           msg = manager.getDatabase(name).getTables();
           return new ExecuteStatementResp(StatusUtil.success(msg), false);
+
+        case INSERT:
+          try {
+            ((InsertPlan) plan).doInsert(manager.getCurrentDatabase());
+          } catch (Exception e) {
+            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+          }
+          return new ExecuteStatementResp(StatusUtil.success("insert"), false);
+
+        case DELETE:
+          try {
+            ((DeletePlan) plan).doDelete(manager.getCurrentDatabase());
+          } catch (Exception e) {
+            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+          }
+          return new ExecuteStatementResp(StatusUtil.success("delete"), false);
+
+        case UPDATE:
+          try {
+            ((UpdatePlan) plan).doUpdate(manager.getCurrentDatabase());
+          } catch (Exception e) {
+            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+          }
+          return new ExecuteStatementResp(StatusUtil.success("update"), false);
 
           //        case SELECT:
           //          Table resultTable = ((SelectPlan)

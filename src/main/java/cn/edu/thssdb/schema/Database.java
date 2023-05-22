@@ -29,6 +29,7 @@ public class Database {
   // Create table.
   public void create(String tableName, Column[] columns) {
     if (tables.containsKey(tableName)) {
+      // Duplicate table name.
       throw new DuplicateTableException(tableName);
     }
     Table table = new Table(this.databaseName, tableName, columns);
@@ -64,6 +65,13 @@ public class Database {
       return "No tables.";
     }
     return "Tables: " + tableNameList;
+  }
+
+  public Table getTableByName(String tableName) {
+    if (!tables.containsKey(tableName)) {
+      throw new TableNotExistException(tableName);
+    }
+    return tables.get(tableName);
   }
 
   public void saveState() {
@@ -122,7 +130,7 @@ public class Database {
         String line;
         while ((line = reader.readLine()) != null) {
           System.out.println(line);
-          LogicalPlan plan = LogicalGenerator.generate(line);
+          LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String tableName = ((CreateTablePlan) plan).getTableName();
           create(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]));
         }

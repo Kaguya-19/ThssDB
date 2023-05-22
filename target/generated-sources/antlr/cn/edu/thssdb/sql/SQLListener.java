@@ -200,26 +200,6 @@ public interface SQLListener extends ParseTreeListener {
 	 */
 	void exitSelectStmt(SQLParser.SelectStmtContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link SQLParser#selectElements}.
-	 * @param ctx the parse tree
-	 */
-	void enterSelectElements(SQLParser.SelectElementsContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#selectElements}.
-	 * @param ctx the parse tree
-	 */
-	void exitSelectElements(SQLParser.SelectElementsContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link SQLParser#tableQueries}.
-	 * @param ctx the parse tree
-	 */
-	void enterTableQueries(SQLParser.TableQueriesContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SQLParser#tableQueries}.
-	 * @param ctx the parse tree
-	 */
-	void exitTableQueries(SQLParser.TableQueriesContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link SQLParser#createViewStmt}.
 	 * @param ctx the parse tree
 	 */

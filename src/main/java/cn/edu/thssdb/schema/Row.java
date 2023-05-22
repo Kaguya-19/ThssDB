@@ -17,6 +17,10 @@ public class Row implements Serializable {
     this.entries = new ArrayList<>(Arrays.asList(entries));
   }
 
+  public Row(Row row) {
+    this.entries = new ArrayList<>(row.entries);
+  }
+
   public ArrayList<Entry> getEntries() {
     return entries;
   }
@@ -30,5 +34,10 @@ public class Row implements Serializable {
     StringJoiner sj = new StringJoiner(", ");
     for (Entry e : entries) sj.add(e.toString());
     return sj.toString();
+  }
+
+  public void update(String columnName, String value, Table table) {
+    int index = table.getColumnNames().indexOf(columnName);
+    entries.set(index, new Entry(value));
   }
 }

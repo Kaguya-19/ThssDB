@@ -27,7 +27,7 @@ import cn.edu.thssdb.sql.SQLParser;
 
 import java.util.ArrayList;
 
-public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
+public class ThssDBSQLVisitor extends SQLBaseVisitor {
   private Manager manager;
 
   @Override
@@ -64,7 +64,7 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
         maxLength = Integer.parseInt(context.typeName().getChild(2).toString());
       }
       boolean notNull = context.getChildCount() > 2 ? true : false;
-      columns.add(new Column(name, Column.getType(type), 0, notNull, maxLength));
+      columns.add(new Column(name, Column.str2ColType(type), 0, notNull, maxLength));
       columnName.add(name);
     }
     // only one primary key, so the efficiency is considerable
@@ -82,19 +82,47 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
     return new DropTablePlan(ctx.tableName().getText());
   }
 
-  //  @Override
-  //  public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
-  //    return new ShowTablePlan(ctx.databaseName().getText());
-  //  }
+  @Override
+  public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
+    return new ShowTablePlan(ctx.tableName().getText());
+  }
 
-  //  @Override
-  //  public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
-  //    ArrayList<ColumnFullName> columnFullNames = (ArrayList<ColumnFullName>)
-  // visit(ctx.selectElements());
-  //    ArrayList<TableQuery> tableQueries = (ArrayList<TableQuery>) visit(ctx.tableQueries());
-  //    ArrayList<Condition> conditions = (ArrayList<Condition>) visit(ctx.multipleCondition());
-  //    return new SelectPlan(columnFullNames, tableQueries, conditions);
-  //  }
+  @Override
+  public LogicalPlan visitInsertStmt(SQLParser.InsertStmtContext ctx) {
+    ArrayList<String> columnNames = new ArrayList<>();
+    ArrayList<String> values = new ArrayList<>();
+    for (SQLParser.ColumnNameContext context : ctx.columnName()) {
+      columnNames.add(context.getText());
+    }
+    for (SQLParser.ValueEntryContext context : ctx.valueEntry()) {
+      for (SQLParser.LiteralValueContext context1 : context.literalValue()) {
+        values.add(context1.getText());
+      }
+    }
+    return new InsertPlan(ctx.tableName().getText(), columnNames, values);
+  }
+
+  @Override
+  public LogicalPlan visitDeleteStmt(SQLParser.DeleteStmtContext ctx) {
+
+    MultipleConditions multipleConditions = (MultipleConditions) visit(ctx.multipleCondition());
+
+    return new DeletePlan(ctx.tableName().getText(), multipleConditions);
+  }
+
+  @Override
+  public LogicalPlan visitUpdateStmt(SQLParser.UpdateStmtContext ctx) {
+    MultipleConditions multipleConditions = (MultipleConditions) visit(ctx.multipleCondition());
+    String columnName = ctx.columnName().getText();
+    String value = ctx.expression().getText(); // TODO: check expression
+    return new UpdatePlan(ctx.tableName().getText(), columnName, value, multipleConditions);
+  }
+
+  //    @Override
+  //    public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
+  //
+  ////      return new SelectPlan(columnFullNames, tableQueries, conditions);
+  //    }
   //
   //  @Override
   //  public ArrayList<ColumnFullName> visitSelectElements(SQLParser.SelectElementsContext ctx) {
@@ -132,18 +160,20 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor<LogicalPlan> {
   //    // }
   //  }
   //
-  //  @Override
-  //  public ArrayList<String> visitMultipleCondition(SQLParser.MultipleConditionContext ctx) {
-  //    ArrayList<Condition> conditions = new ArrayList<>();
-  //    // if (ctx.getChildCount() == 1){
-  //    conditions.add((Condition) visit(ctx.getChild(0)));
-  //    return conditions;
-  //    // }
-  //    // else {
-  //    //   //TODO: calculate || and &&
-  //
-  //    // }
-  //  }
+  @Override
+  public MultipleConditions visitMultipleCondition(SQLParser.MultipleConditionContext ctx) {
+    // tree from root
+    MultipleConditions root = new MultipleConditions(null, null, null);
+    // set by preOrderTraversal
+    if (ctx.getChildCount() == 1) {
+      root.setValue((Condition) visit(ctx.getChild(0)));
+    } else {
+      root.setLeft((MultipleConditions) visit(ctx.getChild(0)));
+      root.setRight((MultipleConditions) visit(ctx.getChild(2)));
+      root.setValue(ctx.getChild(1).getText());
+    }
+    return root;
+  }
   //
   //  @Override
   //  public Object visitCondition(SQLParser.ConditionContext ctx) {

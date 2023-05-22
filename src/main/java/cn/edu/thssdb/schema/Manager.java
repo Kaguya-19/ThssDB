@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Manager {
+  // TODO: MetaData Should change in one database one file
   private HashMap<String, Database> databases;
   private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -26,6 +27,7 @@ public class Manager {
   private String loadedDatabase;
 
   public Manager() {
+    // TODO:Stroage by page
     databases = new HashMap<>();
     loadedDatabase = null;
     System.out.println("[DEBUG] " + "Recovering meta data");
@@ -92,6 +94,7 @@ public class Manager {
   }
 
   //  TODO: should be called in savepoint
+
   private void persist(String delDB) {
     if (delDB != null && !delDB.isEmpty()) {
       removeDatabaseDir(delDB);
@@ -156,7 +159,7 @@ public class Manager {
         BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
         String line;
         while ((line = reader.readLine()) != null) {
-          LogicalPlan plan = LogicalGenerator.generate(line);
+          LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String dbName = ((CreateDatabasePlan) plan).getDatabaseName();
           createDatabaseIfNotExists(dbName);
           if (!databases.get(dbName).recover()) {

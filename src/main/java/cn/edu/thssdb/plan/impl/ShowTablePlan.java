@@ -3,19 +3,19 @@ package cn.edu.thssdb.plan.impl;
 import cn.edu.thssdb.plan.LogicalPlan;
 
 public class ShowTablePlan extends LogicalPlan {
-  private String databaseName;
+  private String tableName;
 
-  public ShowTablePlan(String databaseName) {
+  public ShowTablePlan(String tableName) {
     super(LogicalPlanType.SHOW_TABLE);
-    this.databaseName = databaseName;
+    this.tableName = tableName;
   }
 
   @Override
   public String toString() {
-    return "ShowTablePlan{" + databaseName + "}";
+    return "ShowTablePlan{" + tableName + "}";
   }
 
-  public String getDatabaseName() {
-    return databaseName;
+  public String getTableName() {
+    return tableName;
   }
 }
