@@ -8,6 +8,7 @@ public class Column implements Comparable<Column> {
   private int primary;
   private boolean notNull;
   private int maxLength;
+  public String tableName;
 
   public Column(String name, ColumnType type, int primary, boolean notNull, int maxLength) {
     this.name = name;
@@ -24,6 +25,14 @@ public class Column implements Comparable<Column> {
 
   public String getName() {
     return name;
+  }
+
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
+  }
+
+  public String getTableName() {
+    return tableName;
   }
 
   public void setPrimary(int primary) {

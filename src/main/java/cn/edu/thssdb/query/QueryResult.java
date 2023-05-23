@@ -1,10 +1,15 @@
 package cn.edu.thssdb.query;
 
+import cn.edu.thssdb.parser.ColumnFullName;
+import cn.edu.thssdb.parser.MultipleConditions;
+import cn.edu.thssdb.schema.Column;
+import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 import cn.edu.thssdb.utils.Cell;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,31 +21,80 @@ public class QueryResult {
   private String msg;
   private Table resultTable;
 
-  public QueryResult(QueryTable[] queryTables) {
+  public QueryResult(
+      QueryTable[] queryTables,
+      ArrayList<ColumnFullName> resultColumns,
+      MultipleConditions conditions) {
     // TODO
-    this.index = new ArrayList<>();
-    this.attrs = new ArrayList<>();
+    ArrayList<Integer> maskIndex = maskColumns(queryTables[0], resultColumns);
+    ArrayList<Column> columns = queryTables[0].getColumns();
+    resultTable =
+        new Table(null, null, columns.toArray(new Column[0]), queryTables[0].getPrimaryIndex());
+    for (QueryTable queryTable : queryTables) {
+      maskIndex = maskColumns(queryTable, resultColumns);
+      for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
+        ArrayList<Entry> entries = new ArrayList<>();
+        if (conditions != null) {
+          if (!conditions.check(iterator.next(), queryTable.resultTable)) {
+            continue;
+          }
+        }
+        for (Integer integer : maskIndex) {
+          entries.add(iterator.next().getEntries().get(integer));
+        }
+        Row row = new Row(entries.toArray(new Entry[0]));
+        resultTable.insert(row);
+      }
+    }
+  }
 
-    //    for (QueryTable queryTable : queryTables) {
-    //      for (MetaInfo metaInfo : queryTable.getMetaInfoInfos()) {
-    //        this.metaInfoInfos.add(metaInfo);
-    //      }
-    //    }
-    //
-    //    for (int i = 0; i < metaInfoInfos.size(); i++) {
-    //      index.add(i);
-    //    }
-    //
-    //    for (int i = 0; i < metaInfoInfos.size(); i++) {
-    //      for (int j = 0; j < metaInfoInfos.get(i).getColumns().size(); j++) {
-    //        attrs.add(
-    //            new Cell(
-    //                metaInfoInfos.get(i).getTableName(),
-    //                metaInfoInfos.get(i).getColumns().get(j).getName()));
-    //      }
-    //    }
-    //
-    //    this.resultTable = new Table(metaInfoInfos, index, attrs);
+  private ArrayList<Integer> maskColumns(
+      QueryTable queryTable, ArrayList<ColumnFullName> resultColumns) {
+
+    ArrayList<Column> columns = queryTable.getColumns();
+    ArrayList<Integer> index = new ArrayList<>();
+    if (resultColumns == null
+        || resultColumns.size() == 0
+        || resultColumns.get(0).getColumnName().equals("*")) {
+      for (int i = 0; i < columns.size(); i++) {
+        index.add(i);
+      }
+    } else {
+      // TODO:optimize O(n^2) is ugly
+      for (ColumnFullName resultColumnName : resultColumns) {
+        boolean found = false;
+        for (Column queryTableColumn : columns) {
+          if (resultColumnName.getTableName() != null) {
+            if (resultColumnName.getTableName().equals(queryTableColumn.getTableName())) {
+
+              if (resultColumnName.getColumnName().equals("*")
+                  || resultColumnName.getColumnName().equals(queryTableColumn.getName())) {
+                index.add(columns.indexOf(queryTableColumn));
+                found = true;
+              }
+            }
+          } else if (queryTableColumn.getName().equals(resultColumnName.getColumnName())) {
+            index.add(columns.indexOf(queryTableColumn));
+            found = true;
+          }
+        }
+        if (!found) {
+          throw new RuntimeException("Column not found!");
+        }
+      }
+      // if column with same name exists, throw exception
+      ArrayList<String> columnNames = queryTable.getColumnNames();
+      // TODO:optimize O(n^2) is ugly
+      for (int i = 0; i < columnNames.size(); i++) {
+        for (int j = i + 1; j < columnNames.size(); j++) {
+          if (columnNames.get(i).equals(columnNames.get(j))) {
+            throw new RuntimeException("Column with same name exists!");
+          }
+        }
+      }
+    }
+
+    return index;
   }
 
   public static Row combineRow(LinkedList<Row> rows) {
@@ -55,5 +109,15 @@ public class QueryResult {
 
   public Table getResultTable() {
     return resultTable;
+  }
+
+  public void print() {
+    // Print Column Names
+    for (Column column : resultTable.getColumns()) {
+      System.out.print(column.getName() + " ");
+    }
+    for (Row row : resultTable) {
+      System.out.println(row);
+    }
   }
 }

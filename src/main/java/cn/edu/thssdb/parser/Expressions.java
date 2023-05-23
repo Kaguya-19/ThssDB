@@ -1,6 +1,7 @@
 package cn.edu.thssdb.parser;
 
 public class Expressions extends BinaryTree {
+  // TODO:parse the expression and store the result
 
   protected Expressions left;
   protected Expressions right;

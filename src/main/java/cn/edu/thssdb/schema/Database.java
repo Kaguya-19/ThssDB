@@ -6,8 +6,6 @@ import cn.edu.thssdb.exception.TableNotExistException;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.plan.impl.CreateTablePlan;
-import cn.edu.thssdb.query.QueryResult;
-import cn.edu.thssdb.query.QueryTable;
 
 import java.io.*;
 import java.util.HashMap;
@@ -46,11 +44,11 @@ public class Database {
     System.out.println("[DEBUG] " + "Table " + tableName + " is dropped.");
   }
 
-  public String select(QueryTable[] queryTables) {
-    // TODO
-    QueryResult queryResult = new QueryResult(queryTables);
-    return null;
-  }
+  //  public String select(QueryTable[] queryTables) {
+  //    // TODO
+  //    QueryResult queryResult = new QueryResult(queryTables);
+  //    return null;
+  //  }
 
   public String getTables() {
     String tableNameList = "";

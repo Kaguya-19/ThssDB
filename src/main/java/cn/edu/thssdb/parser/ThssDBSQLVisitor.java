@@ -123,6 +123,7 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
 
   @Override
   public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
+    // TODO:Join
     MultipleConditions conditions = (MultipleConditions) visit(ctx.multipleCondition());
     ArrayList<ColumnFullName> resultColumns = new ArrayList<>();
     ArrayList<TableQuery> tableQueries = new ArrayList<>();
@@ -147,11 +148,18 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   //
   @Override
   public TableQuery visitTableQuery(SQLParser.TableQueryContext ctx) {
-    //       if (ctx.getChildCount() == 1) {
-    return new TableQuery(ctx.tableName(0).getText());
-    //       } else { //TODO:tableName ( K_JOIN tableName )+ K_ON multipleCondition
-    //
-    //          }
+    if (ctx.getChildCount() == 1) {
+      return new TableQuery(ctx.tableName(0).getText());
+    } else { // TODO:tableName ( K_JOIN tableName )+ K_ON multipleCondition
+      ArrayList<String> tableNames = new ArrayList<>();
+      for (SQLParser.TableNameContext context : ctx.tableName()) {
+        tableNames.add(context.getText());
+      }
+      String originalTableName = tableNames.get(0);
+      tableNames.remove(0);
+      return new TableQuery(
+          originalTableName, tableNames, (MultipleConditions) visit(ctx.multipleCondition()));
+    }
   }
 
   @Override

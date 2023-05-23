@@ -1,5 +1,6 @@
 package cn.edu.thssdb.parser;
 
+import cn.edu.thssdb.query.MetaInfo;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 
@@ -26,6 +27,25 @@ public class MultipleConditions extends BinaryTree {
         return leftResult || rightResult;
       }
     }
+  }
+
+  private boolean postOrderTraverse(
+      Row oriRow, Row joinRow, MetaInfo oriMetaInfo, MetaInfo joinMetaInfo) {
+    if (isLeaf()) {
+      return ((Condition) value).check(oriRow, joinRow, oriMetaInfo, joinMetaInfo);
+    } else {
+      boolean leftResult = left.postOrderTraverse(oriRow, joinRow, oriMetaInfo, joinMetaInfo);
+      boolean rightResult = right.postOrderTraverse(oriRow, joinRow, oriMetaInfo, joinMetaInfo);
+      if (value.equals("AND")) {
+        return leftResult && rightResult;
+      } else {
+        return leftResult || rightResult;
+      }
+    }
+  }
+
+  public boolean check(Row oriRow, Row joinRow, MetaInfo oriMetaInfo, MetaInfo joinMetaInfo) {
+    return postOrderTraverse(oriRow, joinRow, oriMetaInfo, joinMetaInfo);
   }
 
   public boolean check(Row row, Table table) {

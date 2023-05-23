@@ -129,6 +129,14 @@ public class Table implements Iterable<Row> {
     return null;
   }
 
+  public String getTableName() {
+    return tableName;
+  }
+
+  public int getPrimaryIndex() {
+    return primaryIndex;
+  }
+
   private class TableIterator implements Iterator<Row> {
     private Iterator<Pair<Entry, Row>> iterator;
 

@@ -33,8 +33,9 @@ public class InsertPlan extends LogicalPlan {
 
   public void doInsert(Database database) {
     Table table = database.getTableByName(tableName);
-    ArrayList<Entry> entries = new ArrayList<>();
+
     for (ArrayList<String> valueNames : valuess) {
+      ArrayList<Entry> entries = new ArrayList<>();
       if (columnNames == null
           || columnNames.size()
               == 0) { // INSERT INTO table_name VALUES (value1, value2, value3, ...)

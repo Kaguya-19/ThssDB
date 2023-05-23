@@ -134,11 +134,13 @@ public class IServiceHandler implements IService.Iface {
           }
           return new ExecuteStatementResp(StatusUtil.success("update"), false);
 
-          //        case SELECT:
-          //          Table resultTable = ((SelectPlan)
-          // plan).doSelect(manager.getCurrentDatabase());
-          //          return new ExecuteStatementResp(StatusUtil.success("select"), false,
-          // resultTable.columns);
+        case SELECT:
+          try {
+            ((SelectPlan) plan).doSelect(manager.getCurrentDatabase());
+          } catch (Exception e) {
+            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+          }
+          return new ExecuteStatementResp(StatusUtil.success("select"), false);
 
         default:
       }
