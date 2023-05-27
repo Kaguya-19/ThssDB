@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class QueryTable implements Iterator<Row> {
 
-  Iterator<Row> iterator;
+  private Iterator<Row> iterator;
   Table resultTable;
 
   public QueryTable(Table originTable) {
@@ -21,9 +21,17 @@ public class QueryTable implements Iterator<Row> {
       column.setTableName(originTable.getTableName());
     }
     String originTableName = originTable.getTableName();
-    resultTable =
+    this.resultTable =
         new Table(
             null, originTableName, columns.toArray(new Column[0]), originTable.getPrimaryIndex());
+    // copy rows
+    for (Row row : originTable) {
+      Row newRow = new Row();
+      newRow.addAll(row);
+      resultTable.insert(newRow);
+    }
+
+    this.iterator = resultTable.iterator();
   }
 
   public QueryTable(Table originTable, Table joinTable, MultipleConditions conditions) {
@@ -58,6 +66,7 @@ public class QueryTable implements Iterator<Row> {
         }
       }
     }
+    this.iterator = resultTable.iterator();
   }
 
   public void join(Table table, MultipleConditions conditions) {
@@ -85,6 +94,7 @@ public class QueryTable implements Iterator<Row> {
       }
     }
     resultTable = _resultTable;
+    this.iterator = resultTable.iterator();
   }
 
   @Override

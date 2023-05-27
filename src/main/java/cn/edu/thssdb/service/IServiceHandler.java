@@ -136,11 +136,11 @@ public class IServiceHandler implements IService.Iface {
 
         case SELECT:
           try {
-            ((SelectPlan) plan).doSelect(manager.getCurrentDatabase());
+            String result = ((SelectPlan) plan).doSelect(manager.getCurrentDatabase());
+            return new ExecuteStatementResp(StatusUtil.success(result), false);
           } catch (Exception e) {
             return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
           }
-          return new ExecuteStatementResp(StatusUtil.success("select"), false);
 
         default:
       }

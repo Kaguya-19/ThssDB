@@ -32,4 +32,12 @@ public class MetaInfo {
   public ArrayList<Column> getColumns() {
     return (ArrayList<Column>) columns;
   }
+
+  public ArrayList<String> getColumnNames() {
+    ArrayList<String> names = new ArrayList<>();
+    for (Column column : columns) {
+      names.add(column.getName());
+    }
+    return names;
+  }
 }

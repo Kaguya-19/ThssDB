@@ -5,9 +5,10 @@ import cn.edu.thssdb.schema.Database;
 import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
-import cn.edu.thssdb.type.ColumnType;
 
 import java.util.ArrayList;
+
+import static cn.edu.thssdb.type.ColumnType.getEntryByType;
 
 public class InsertPlan extends LogicalPlan {
 
@@ -87,31 +88,5 @@ public class InsertPlan extends LogicalPlan {
   @Override
   public String toString() {
     return "InsertPlan{" + "tableName='" + tableName + '\'' + '}';
-  }
-
-  private Comparable getEntryByType(String value, ColumnType type) {
-    try {
-      switch (type) {
-        case INT:
-          return Integer.parseInt(value);
-        case LONG:
-          return Long.parseLong(value);
-        case FLOAT:
-          return Float.parseFloat(value);
-        case DOUBLE:
-          return Double.parseDouble(value);
-        case STRING:
-          // null
-          if (value.equals("null")) {
-            return null;
-          }
-          // delete the ' and "
-          return value.substring(1, value.length() - 1);
-        default:
-          return null;
-      }
-    } catch (Exception e) {
-      throw new RuntimeException("Type Error");
-    }
   }
 }

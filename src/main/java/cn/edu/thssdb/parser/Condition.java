@@ -1,8 +1,11 @@
 package cn.edu.thssdb.parser;
 
 import cn.edu.thssdb.query.MetaInfo;
+import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
+
+import static cn.edu.thssdb.type.ColumnType.getEntryByType;
 
 public class Condition {
   private ColumnFullName c1;
@@ -41,8 +44,10 @@ public class Condition {
 
   private boolean checkLiteral(Row row, Table table) {
     // TODO: set data structure for row
-    int index = table.getColumns().indexOf(c1.getColumnName());
+    int index = table.getColumnNames().indexOf(c1.getColumnName());
     Object v1 = row.getEntries().get(index).value;
+    Column column = table.getColumns().get(index);
+    value = getEntryByType((String) value, column.getType());
     switch (op) {
       case "=":
         return v1.equals(value);
@@ -66,15 +71,20 @@ public class Condition {
     String tableName = c1.getTableName();
     String columnName = c1.getColumnName();
     Object v1;
+    Column column;
     if (oriMetaInfo.getTableName().equals(tableName)) {
-      int index = oriMetaInfo.getColumns().indexOf(columnName);
+      int index = oriMetaInfo.getColumnNames().indexOf(columnName);
       v1 = oriRow.getEntries().get(index).value;
+      column = oriMetaInfo.getColumns().get(index);
     } else if (joinMetaInfo.getTableName().equals(tableName)) {
-      int index = joinMetaInfo.getColumns().indexOf(columnName);
+      int index = joinMetaInfo.getColumnNames().indexOf(columnName);
       v1 = joinRow.getEntries().get(index).value;
+      column = joinMetaInfo.getColumns().get(index);
     } else {
       throw new RuntimeException("Table name not found");
     }
+
+    value = getEntryByType((String) value, column.getType());
     switch (op) {
       case "=":
         return v1.equals(value);
@@ -100,21 +110,26 @@ public class Condition {
     String tableName2 = c2.getTableName();
     String columnName2 = c2.getColumnName();
     Object v1, v2;
+    Column column1, column2;
     if (oriMetaInfo.getTableName().equals(tableName1)) {
       int index = oriMetaInfo.getColumns().indexOf(columnName1);
       v1 = oriRow.getEntries().get(index).value;
+      column1 = oriMetaInfo.getColumns().get(index);
     } else if (joinMetaInfo.getTableName().equals(tableName1)) {
       int index = joinMetaInfo.getColumns().indexOf(columnName1);
       v1 = joinRow.getEntries().get(index).value;
+      column1 = joinMetaInfo.getColumns().get(index);
     } else {
       throw new RuntimeException("Table name not found");
     }
     if (oriMetaInfo.getTableName().equals(tableName2)) {
       int index = oriMetaInfo.getColumns().indexOf(columnName2);
       v2 = oriRow.getEntries().get(index).value;
+      column2 = oriMetaInfo.getColumns().get(index);
     } else if (joinMetaInfo.getTableName().equals(tableName2)) {
       int index = joinMetaInfo.getColumns().indexOf(columnName2);
       v2 = joinRow.getEntries().get(index).value;
+      column2 = joinMetaInfo.getColumns().get(index);
     } else {
       throw new RuntimeException("Table name not found");
     }
@@ -137,8 +152,8 @@ public class Condition {
   }
 
   private boolean checkColumn(Row row, Table table) {
-    int index1 = table.getColumns().indexOf(c1.getColumnName());
-    int index2 = table.getColumns().indexOf(c2.getColumnName());
+    int index1 = table.getColumnNames().indexOf(c1.getColumnName());
+    int index2 = table.getColumnNames().indexOf(c2.getColumnName());
     Object v1 = row.getEntries().get(index1).value;
     Object v2 = row.getEntries().get(index2).value;
     switch (op) {

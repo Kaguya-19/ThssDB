@@ -34,16 +34,17 @@ public class QueryResult {
       maskIndex = maskColumns(queryTable, resultColumns);
       for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
         ArrayList<Entry> entries = new ArrayList<>();
+        Row row = iterator.next();
         if (conditions != null) {
-          if (!conditions.check(iterator.next(), queryTable.resultTable)) {
+          if (!conditions.check(row, queryTable.resultTable)) {
             continue;
           }
         }
         for (Integer integer : maskIndex) {
-          entries.add(iterator.next().getEntries().get(integer));
+          entries.add(row.getEntries().get(integer));
         }
-        Row row = new Row(entries.toArray(new Entry[0]));
-        resultTable.insert(row);
+        Row newRow = new Row(entries.toArray(new Entry[0]));
+        resultTable.insert(newRow);
       }
     }
   }
@@ -63,6 +64,7 @@ public class QueryResult {
       // TODO:optimize O(n^2) is ugly
       for (ColumnFullName resultColumnName : resultColumns) {
         boolean found = false;
+
         for (Column queryTableColumn : columns) {
           if (resultColumnName.getTableName() != null) {
             if (resultColumnName.getTableName().equals(queryTableColumn.getTableName())) {
@@ -111,13 +113,17 @@ public class QueryResult {
     return resultTable;
   }
 
-  public void print() {
+  public String print() {
     // Print Column Names
+    StringBuilder stringBuilder = new StringBuilder();
     for (Column column : resultTable.getColumns()) {
-      System.out.print(column.getName() + " ");
+      stringBuilder.append(column.getName()).append(" ");
     }
+    stringBuilder.append("\n");
+    // Print Rows
     for (Row row : resultTable) {
-      System.out.println(row);
+      stringBuilder.append(row.toString()).append("\n");
     }
+    return stringBuilder.toString();
   }
 }

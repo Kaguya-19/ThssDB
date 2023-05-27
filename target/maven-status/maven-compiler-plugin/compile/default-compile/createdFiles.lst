@@ -75,7 +75,6 @@ cn\edu\thssdb\exception\DuplicateKeyException.class
 cn\edu\thssdb\rpc\thrift\ConnectResp$_Fields.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementReq$ExecuteStatementReqStandardScheme.class
 cn\edu\thssdb\plan\impl\QuitPlan.class
-cn\edu\thssdb\plan\impl\InsertPlan$1.class
 cn\edu\thssdb\rpc\thrift\IService$getTime_args$getTime_argsTupleSchemeFactory.class
 cn\edu\thssdb\type\AlignType.class
 cn\edu\thssdb\service\IServiceHandler.class
@@ -136,6 +135,7 @@ cn\edu\thssdb\rpc\thrift\ExecuteStatementResp.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor$getTime$1.class
 cn\edu\thssdb\rpc\thrift\ConnectResp$ConnectRespStandardSchemeFactory.class
 cn\edu\thssdb\plan\impl\CreateTablePlan.class
+cn\edu\thssdb\type\ColumnType$1.class
 cn\edu\thssdb\sql\SQLParser$UpdateStmtContext.class
 cn\edu\thssdb\rpc\thrift\IService$getTime_args$_Fields.class
 cn\edu\thssdb\rpc\thrift\IService$disconnect_args$_Fields.class

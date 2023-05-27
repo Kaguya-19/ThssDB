@@ -26,8 +26,7 @@ public class SelectPlan extends LogicalPlan {
     this.resultColumns = resultColumns;
     this.tableQueries = tableQueries;
     this.conditions = conditions;
-    //    this.queryTable = new QueryTable();
-
+    this.queryTables = new ArrayList<>();
   }
 
   private void generatrQueryTable(Database database) {
@@ -39,23 +38,25 @@ public class SelectPlan extends LogicalPlan {
       }
 
       QueryTable queryTable = new QueryTable(table);
-      for (String tableName : tableQuery.getJoinTableNames()) {
-        Table joinTable = database.getTableByName(tableName);
-        if (joinTable == null) {
-          throw new RuntimeException("Table not found!");
+      if (tableQuery.getJoinTableNames() != null) {
+        for (String tableName : tableQuery.getJoinTableNames()) {
+          Table joinTable = database.getTableByName(tableName);
+          if (joinTable == null) {
+            throw new RuntimeException("Table not found!");
+          }
+          queryTable.join(joinTable, tableQuery.getConditions());
         }
-        queryTable.join(joinTable, tableQuery.getConditions());
       }
       this.queryTables.add(queryTable);
     }
   }
 
-  public void doSelect(Database database) {
+  public String doSelect(Database database) {
     // TODO
     generatrQueryTable(database);
     queryResult =
         new QueryResult(queryTables.toArray(new QueryTable[0]), resultColumns, conditions);
     // Print the result
-    queryResult.print();
+    return queryResult.print();
   }
 }
