@@ -26,6 +26,7 @@ sqlStmt :
     | revokeStmt
     | useDbStmt
     | showDbStmt
+    | showAllTableStmt
     | showTableStmt
     | quitStmt
     | updateStmt
@@ -75,13 +76,16 @@ dropTableStmt :
     K_DROP K_TABLE ( K_IF K_EXISTS )? tableName ;
 
 showDbStmt :
-    K_SHOW K_DATABASES;
+    K_SHOW K_DATABASES ;
 
 quitStmt :
-    K_QUIT;
+    K_QUIT ;
+
+showAllTableStmt :
+    K_SHOW K_TABLES ;
 
 showTableStmt :
-    K_SHOW K_TABLE tableName;
+    K_SHOW K_TABLE tableName ;
 
 insertStmt :
     K_INSERT K_INTO tableName ( '(' columnName ( ',' columnName )* ')' )?
@@ -231,6 +235,7 @@ K_SELECT : S E L E C T;
 K_SET : S E T;
 K_SHOW : S H O W;
 K_TABLE : T A B L E;
+K_TABLES : T A B L E S;
 K_TO : T O;
 K_UPDATE : U P D A T E;
 K_USE : U S E;

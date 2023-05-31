@@ -20,7 +20,8 @@ public class LockManager {
 
   public void recordLock(Integer recourseId, ReentrantReadWriteLock lock) {
     lockTable.put(recourseId, lock);
-    System.out.println(recourseId + " Read: " + lock.getReadHoldCount() + " Write: " + lock.getWriteHoldCount());
+    System.out.println(
+        recourseId + " Read: " + lock.getReadHoldCount() + " Write: " + lock.getWriteHoldCount());
   }
 
   public void beginTransaction() {
@@ -32,11 +33,11 @@ public class LockManager {
       throw new TransactionOnProcessException();
     }
     transactionMode = mode;
-//    String text = "read committed";
-//    if (mode) {
-//      text = "Serializable";
-//    }
-//    System.out.println("Transaction mode now is set to: " + text);
+    //    String text = "read committed";
+    //    if (mode) {
+    //      text = "Serializable";
+    //    }
+    //    System.out.println("Transaction mode now is set to: " + text);
 
   }
 
@@ -44,17 +45,20 @@ public class LockManager {
   public void commit() {
     //    System.out.println("Transaction begin called: " + transactionState);
     for (Integer key : lockTable.keySet()) {
-//      System.out.println(key);
+      //      System.out.println(key);
       ReentrantReadWriteLock lock = lockTable.get(key);
       if (lock.getReadHoldCount() > 0) {
         lock.readLock().unlock();
-//        System.out.println("Commit release read lock. Read lock hold: " + lock.getReadHoldCount());
+        //        System.out.println("Commit release read lock. Read lock hold: " +
+        // lock.getReadHoldCount());
       }
       if (lock.getWriteHoldCount() > 0) {
         lock.writeLock().unlock();
-//        System.out.println("Commit release write lock. Write lock hold: " + lock.getWriteHoldCount());
+        //        System.out.println("Commit release write lock. Write lock hold: " +
+        // lock.getWriteHoldCount());
       }
-//      System.out.println(key + " Read: " + lock.getReadHoldCount() + " Write: " + lock.getWriteHoldCount());
+      //      System.out.println(key + " Read: " + lock.getReadHoldCount() + " Write: " +
+      // lock.getWriteHoldCount());
     }
     lockTable.clear();
     transactionOnProcess = false;

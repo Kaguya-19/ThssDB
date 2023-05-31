@@ -1,6 +1,8 @@
 package cn.edu.thssdb.service;
 
 import cn.edu.thssdb.LockManager;
+import cn.edu.thssdb.exception.DatabaseNotExistException;
+import cn.edu.thssdb.exception.DatabaseNotSelectedException;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.plan.impl.*;
@@ -98,6 +100,10 @@ public class IServiceHandler implements IService.Iface {
           manager.switchDatabase(name);
           break;
 
+        case SHOW_DB:
+          msg = manager.getAllDatabase();
+          break;
+
         case CREATE_TABLE:
           name = ((CreateTablePlan) plan).getTableName();
           msg = "Table " + name + " is created.";
@@ -116,7 +122,14 @@ public class IServiceHandler implements IService.Iface {
 
         case SHOW_TABLE:
           name = ((ShowTablePlan) plan).getTableName();
-          msg = manager.getDatabase(name).getTables();
+          msg = manager.getDatabase(name).getTableByName(name).getTableStructure();
+          break;
+
+        case SHOW_ALL_TABLE:
+          if (manager.getCurrentDatabase() == null) {
+            throw new DatabaseNotSelectedException();
+          }
+          msg = manager.getCurrentDatabase().getTables();
           break;
 
         case INSERT:
@@ -181,7 +194,7 @@ public class IServiceHandler implements IService.Iface {
           break;
 
         case SET_TRANSACTION_ISOLATION_LEVEL:
-          lockManager.setTransactionMode(((SetTransactionIsolationLevelPlan)plan).getMode());
+          lockManager.setTransactionMode(((SetTransactionIsolationLevelPlan) plan).getMode());
           msg = "Transaction isolation mode switch to: " + lockManager.getMode();
           break;
 

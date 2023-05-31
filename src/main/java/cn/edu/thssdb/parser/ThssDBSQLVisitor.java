@@ -24,7 +24,6 @@ import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.sql.SQLBaseVisitor;
 import cn.edu.thssdb.sql.SQLParser;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
 
@@ -49,7 +48,7 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public LogicalPlan visitSetTransactionLevelStmt(SQLParser.SetTransactionLevelStmtContext ctx) {
     boolean mode = false; // true for serializable, false for read committed
-    if(ctx.children.size() == 5) {
+    if (ctx.children.size() == 5) {
       mode = true;
     }
     return new SetTransactionIsolationLevelPlan(mode);
@@ -68,6 +67,11 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public LogicalPlan visitUseDbStmt(SQLParser.UseDbStmtContext ctx) {
     return new UseDatabasePlan(ctx.databaseName().getText());
+  }
+
+  @Override
+  public LogicalPlan visitShowDbStmt(SQLParser.ShowDbStmtContext ctx) {
+    return new ShowDatabasesPlan();
   }
 
   @Override
@@ -106,6 +110,11 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public LogicalPlan visitShowTableStmt(SQLParser.ShowTableStmtContext ctx) {
     return new ShowTablePlan(ctx.tableName().getText());
+  }
+
+  @Override
+  public LogicalPlan visitShowAllTableStmt(SQLParser.ShowAllTableStmtContext ctx) {
+    return new ShowAllTablePlan();
   }
 
   @Override

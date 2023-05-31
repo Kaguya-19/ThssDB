@@ -16,6 +16,7 @@ cn\edu\thssdb\rpc\thrift\IService$connect_args.class
 cn\edu\thssdb\rpc\thrift\IService$connect_result$connect_resultTupleScheme.class
 cn\edu\thssdb\plan\impl\SelectPlan.class
 cn\edu\thssdb\rpc\thrift\IService$connect_result$connect_resultTupleSchemeFactory.class
+cn\edu\thssdb\exception\TransactionOnProcessException.class
 cn\edu\thssdb\rpc\thrift\IService$disconnect_result$disconnect_resultStandardSchemeFactory.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncClient$executeStatement_call.class
 cn\edu\thssdb\schema\Database.class
@@ -67,7 +68,9 @@ cn\edu\thssdb\parser\MultipleConditions.class
 cn\edu\thssdb\sql\SQLParser$ColumnFullNameContext.class
 cn\edu\thssdb\plan\impl\CreateDatabasePlan.class
 cn\edu\thssdb\rpc\thrift\Status$StatusTupleScheme.class
+cn\edu\thssdb\sql\SQLParser$ShowAllTableStmtContext.class
 cn\edu\thssdb\sql\SQLParser$ColumnNameContext.class
+cn\edu\thssdb\plan\impl\ShowDatabasesPlan.class
 cn\edu\thssdb\sql\SQLParser$ExpressionContext.class
 cn\edu\thssdb\schema\Column.class
 cn\edu\thssdb\sql\SQLParser$TableConstraintContext.class
@@ -113,6 +116,7 @@ cn\edu\thssdb\schema\Table$TableIterator.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor$disconnect$1.class
 cn\edu\thssdb\schema\Entry.class
 cn\edu\thssdb\sql\SQLParser$DropUserStmtContext.class
+cn\edu\thssdb\plan\impl\SetTransactionIsolationLevelPlan.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor$disconnect.class
 cn\edu\thssdb\rpc\thrift\IService$executeStatement_args.class
 cn\edu\thssdb\index\BPlusTreeNode.class
@@ -224,6 +228,7 @@ cn\edu\thssdb\rpc\thrift\IService$Processor.class
 cn\edu\thssdb\sql\SQLParser$SqlStmtContext.class
 cn\edu\thssdb\sql\SQLParser$AuthLevelContext.class
 cn\edu\thssdb\sql\SQLParser$SqlStmtListContext.class
+cn\edu\thssdb\exception\getLockFailedException.class
 cn\edu\thssdb\rpc\thrift\ConnectReq$_Fields.class
 cn\edu\thssdb\rpc\thrift\IService.class
 cn\edu\thssdb\rpc\thrift\IService$connect_result$connect_resultStandardScheme.class

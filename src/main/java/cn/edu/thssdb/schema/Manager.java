@@ -34,7 +34,7 @@ public class Manager {
     recover();
     System.out.println("[DEBUG] " + "Meta data recovered");
     for (Database db : databases.values()) {
-      System.out.println(db.toString());
+      System.out.println(db.getDatabaseStructure());
     }
   }
 
@@ -91,6 +91,21 @@ public class Manager {
     Database db = databases.get(databaseName);
     if (db == null) throw new DatabaseNotExistException(databaseName);
     return db;
+  }
+
+  public String getAllDatabase() {
+    String dbNameList = "";
+    System.out.println("[DEBUG] " + "db count: " + databases.values().size());
+    int i = 0;
+    int n = databases.values().size() - 2;
+    for (Database db : databases.values()) {
+      dbNameList = dbNameList.concat(db.getDatabaseName());
+      if (i < n) dbNameList = dbNameList + ", ";
+    }
+    if (dbNameList.length() == 0) {
+      return "No databases.";
+    }
+    return "Databases: " + dbNameList;
   }
 
   // Called when modified
@@ -152,7 +167,9 @@ public class Manager {
       String pattern = "CREATE DATABASE ".concat(databaseName);
       File file = new File(managerScriptPath);
       File tempFile =
-          new File(Global.MANAGER_DIR.concat(databaseName + File.separator + "manager.temp"));
+          new File(Global.MANAGER_DIR.concat("manager.temp"));
+      if (tempFile.exists()) tempFile.delete();
+      tempFile.createNewFile();
 
       BufferedReader reader = new BufferedReader(new FileReader(file));
       BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));

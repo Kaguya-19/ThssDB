@@ -234,6 +234,18 @@ public class SQLBaseListener implements SQLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterShowAllTableStmt(SQLParser.ShowAllTableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitShowAllTableStmt(SQLParser.ShowAllTableStmtContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterShowTableStmt(SQLParser.ShowTableStmtContext ctx) { }
 	/**
 	 * {@inheritDoc}

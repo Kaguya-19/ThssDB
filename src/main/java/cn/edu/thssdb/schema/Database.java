@@ -76,7 +76,9 @@ public class Database {
     try {
       File file = new File(scriptFilePath);
       File tempFile =
-          new File(Global.MANAGER_DIR.concat(databaseName + File.separator + "temp.txt"));
+          new File(Global.MANAGER_DIR.concat(databaseName + File.separator + "manager.temp"));
+      if (tempFile.exists()) tempFile.delete();
+      tempFile.createNewFile();
 
       BufferedReader reader = new BufferedReader(new FileReader(file));
       BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
@@ -175,11 +177,10 @@ public class Database {
     return databaseName;
   }
 
-  @Override
-  public String toString() {
+  public String getDatabaseStructure() {
     String buffer = databaseName + '\n';
     for (Table table : tables.values()) {
-      buffer = buffer.concat(table.toString() + '\n');
+      buffer = buffer.concat(table.getTableStructure() + '\n');
     }
     return buffer;
   }

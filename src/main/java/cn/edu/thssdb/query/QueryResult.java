@@ -33,7 +33,7 @@ public class QueryResult {
     resultTable =
         new Table(null, null, columns.toArray(new Column[0]), queryTables[0].getPrimaryIndex());
 
-//    resultTable.useWriteLock(lockManager, "QueryTable");
+    //    resultTable.useWriteLock(lockManager, "QueryTable");
 
     for (QueryTable queryTable : queryTables) {
       maskIndex = maskColumns(queryTable, resultColumns);
@@ -55,7 +55,7 @@ public class QueryResult {
 
     /* for debug use */
     try {
-//      System.out.println("Select sleep 5 secs");
+      //      System.out.println("Select sleep 5 secs");
       Thread.sleep(5000);
     } catch (Exception e) {
       e.printStackTrace();
