@@ -24,6 +24,7 @@ import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.sql.SQLBaseVisitor;
 import cn.edu.thssdb.sql.SQLParser;
+import org.omg.CORBA.PUBLIC_MEMBER;
 
 import java.util.ArrayList;
 
@@ -33,6 +34,25 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public LogicalPlan visitQuitStmt(SQLParser.QuitStmtContext ctx) {
     return new QuitPlan();
+  }
+
+  @Override
+  public LogicalPlan visitBeginTransactionStmt(SQLParser.BeginTransactionStmtContext ctx) {
+    return new BeginTransactionPlan();
+  }
+
+  @Override
+  public LogicalPlan visitCommitStmt(SQLParser.CommitStmtContext ctx) {
+    return new CommitPlan();
+  }
+
+  @Override
+  public LogicalPlan visitSetTransactionLevelStmt(SQLParser.SetTransactionLevelStmtContext ctx) {
+    boolean mode = false; // true for serializable, false for read committed
+    if(ctx.children.size() == 5) {
+      mode = true;
+    }
+    return new SetTransactionIsolationLevelPlan(mode);
   }
 
   @Override

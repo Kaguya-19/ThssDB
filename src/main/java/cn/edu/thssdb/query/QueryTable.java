@@ -1,5 +1,6 @@
 package cn.edu.thssdb.query;
 
+import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Row;
@@ -13,8 +14,8 @@ public class QueryTable implements Iterator<Row> {
   private Iterator<Row> iterator;
   Table resultTable;
 
-  public QueryTable(Table originTable) {
-    // TODO
+  public QueryTable(LockManager lockManager, Table originTable) {
+    // deadlock here
     ArrayList<Column> columns = new ArrayList<>();
     columns.addAll(originTable.getColumns());
     for (Column column : columns) {
@@ -24,17 +25,19 @@ public class QueryTable implements Iterator<Row> {
     this.resultTable =
         new Table(
             null, originTableName, columns.toArray(new Column[0]), originTable.getPrimaryIndex());
+    resultTable.useWriteLock(lockManager, "resultTable");
     // copy rows
     for (Row row : originTable) {
       Row newRow = new Row();
       newRow.addAll(row);
-      resultTable.insert(newRow);
+      resultTable.insertWithoutLock(newRow);
     }
 
     this.iterator = resultTable.iterator();
   }
 
-  public QueryTable(Table originTable, Table joinTable, MultipleConditions conditions) {
+  public QueryTable(
+      LockManager lockManager, Table originTable, Table joinTable, MultipleConditions conditions) {
     // 1. join two tables
     ArrayList<Column> columns = new ArrayList<>();
     String originTableName = originTable.getTableName();
@@ -62,14 +65,14 @@ public class QueryTable implements Iterator<Row> {
           Row newRow = new Row();
           newRow.addAll(originRow);
           newRow.addAll(joinRow);
-          resultTable.insert(newRow);
+          resultTable.insert(lockManager, newRow);
         }
       }
     }
     this.iterator = resultTable.iterator();
   }
 
-  public void join(Table table, MultipleConditions conditions) {
+  public void join(LockManager lockManager, Table table, MultipleConditions conditions) {
     // TODO
     ArrayList<Column> columns = new ArrayList<>();
     String originTableName = resultTable.getTableName();
@@ -82,6 +85,7 @@ public class QueryTable implements Iterator<Row> {
     columns.addAll(joinColumns);
     Table _resultTable =
         new Table(null, originTableName + "_" + joinTableName, columns.toArray(new Column[0]), 0);
+    _resultTable.useWriteLock(lockManager, "join");
     // 2. filter rows
     for (Row originRow : resultTable) {
       for (Row joinRow : table) {
@@ -89,7 +93,7 @@ public class QueryTable implements Iterator<Row> {
           Row newRow = new Row();
           newRow.addAll(originRow);
           newRow.addAll(joinRow);
-          _resultTable.insert(newRow);
+          _resultTable.insertWithoutLock(newRow);
         }
       }
     }

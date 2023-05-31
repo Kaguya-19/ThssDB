@@ -35,8 +35,8 @@ public class Column implements Comparable<Column> {
     return tableName;
   }
 
-  public void setPrimary(int primary) {
-    this.primary = primary;
+  public void setPrimary() {
+    this.primary = 1;
   }
 
   public boolean isPrimary() {
@@ -79,6 +79,6 @@ public class Column implements Comparable<Column> {
   }
 
   public static String toPrimary(String columnName) {
-    return !columnName.isEmpty() ? "PRIMARY KEY (" + columnName + ")" : "";
+    return columnName.isEmpty() ? "" : "PRIMARY KEY (" + columnName + ")";
   }
 }

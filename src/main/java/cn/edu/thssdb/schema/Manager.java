@@ -44,7 +44,7 @@ public class Manager {
       databases.put(databaseName, database);
       System.out.println("[DEBUG] " + "Database created");
 
-      //      persist(null);
+      persist(databaseName);
 
       if (loadedDatabase == null) {
         switchDatabase(databaseName);
@@ -64,7 +64,7 @@ public class Manager {
     databases.remove(databaseName);
     if (loadedDatabase.equals(databaseName)) loadedDatabase = null;
     System.out.println("[DEBUG] " + "Database dropped");
-    //    persist(databaseName);
+    dropDatabaseDir(databaseName);
   }
 
   public void switchDatabase(String databaseName) {
@@ -93,41 +93,45 @@ public class Manager {
     return db;
   }
 
-  //  TODO: should be called in savepoint
-
-  private void persist(String delDB) {
-    if (delDB != null && !delDB.isEmpty()) {
-      removeDatabaseDir(delDB);
-    } else {
-      //      System.out.println("No db is dropped.");
-    }
+  // Called when modified
+  private void persist(String databaseName) {
     // update manager.script
-    String scriptFilePath = Global.MANAGER_DIR.concat("manager.script");
+    String managerScriptPath = Global.MANAGER_DIR.concat("manager.script");
     try {
-      File scriptFile = new File(scriptFilePath);
-      if (scriptFile.exists()) {
-        scriptFile.delete();
+      File scriptFile = new File(managerScriptPath);
+      if (!scriptFile.exists()) {
+        scriptFile.createNewFile();
       }
-      scriptFile.createNewFile();
-
-      FileOutputStream fos = new FileOutputStream(scriptFilePath);
+      FileOutputStream fos = new FileOutputStream(managerScriptPath);
       OutputStreamWriter writer = new OutputStreamWriter(fos);
+      writer.write("CREATE DATABASE ".concat(databaseName + "\n"));
+
+      String dirPath = Global.MANAGER_DIR.concat(databaseName);
+      File dir = new File(dirPath);
+      if (!dir.exists()) dir.mkdirs();
+
+      String dbScriptPath =
+          Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
+      File dbScript = new File(dbScriptPath);
+      if (!dbScript.exists()) dbScript.createNewFile();
+
       // only add current db
-      for (String db : databases.keySet()) {
-        writer.write("create database ".concat(db + "\n"));
-        // create a folder for database
-        String dirPath = Global.MANAGER_DIR.concat(db);
-        File dir = new File(dirPath);
-        if (dir.exists()) {
-          //          System.out.println("Database folder created.");
-        } else {
-          dir.mkdirs();
-        }
-        // create empty .script file
-        String dbScriptFile = Global.MANAGER_DIR.concat(db + File.separator + db + ".script");
-        File dbScript = new File(dbScriptFile);
-        if (!dbScript.exists()) dbScript.createNewFile();
-      }
+      //      for (String db : databases.keySet()) {
+      //        writer.write("create database ".concat(db + "\n"));
+      //        // create a folder for database
+      //        String dirPath = Global.MANAGER_DIR.concat(db);
+      //        File dir = new File(dirPath);
+      //        if (dir.exists()) {
+      //          //          System.out.println("Database folder created.");
+      //        } else {
+      //          dir.mkdirs();
+      //        }
+      //        // create empty .script file
+      //        String dbScriptPath = Global.MANAGER_DIR.concat(db + File.separator + db +
+      // ".script");
+      //        File dbScript = new File(dbScriptPath);
+      //        if (!dbScript.exists()) dbScript.createNewFile();
+      //      }
       writer.close();
       fos.close();
     } catch (IOException e) {
@@ -135,7 +139,7 @@ public class Manager {
     }
   }
 
-  private void removeDatabaseDir(String databaseName) {
+  private void dropDatabaseDir(String databaseName) {
     String folderPath = Global.MANAGER_DIR.concat(databaseName);
     try {
       Path directory = Paths.get(folderPath);
@@ -143,8 +147,40 @@ public class Manager {
           .sorted(java.util.Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);
+
+      String managerScriptPath = Global.MANAGER_DIR.concat("manager.script");
+      String pattern = "CREATE DATABASE ".concat(databaseName);
+      File file = new File(managerScriptPath);
+      File tempFile =
+          new File(Global.MANAGER_DIR.concat(databaseName + File.separator + "manager.temp"));
+
+      BufferedReader reader = new BufferedReader(new FileReader(file));
+      BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+      String currentLine;
+      while ((currentLine = reader.readLine()) != null) {
+        if (!currentLine.startsWith(pattern)) {
+          writer.write(currentLine);
+          writer.newLine();
+        }
+      }
+      reader.close();
+      writer.close();
+
+      if (file.delete()) {
+        if (!tempFile.renameTo(file)) {
+          System.out.println("Failed to rename the temp file.");
+        }
+      } else {
+        System.out.println("Failed to delete the original file.");
+      }
+
       System.out.println("Folder and its contents deleted successfully.");
     } catch (IOException e) {
+      e.printStackTrace();
+    }
+    try {
+
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
@@ -154,6 +190,10 @@ public class Manager {
     String scriptFilePath = Global.MANAGER_DIR.concat("manager.script");
     try {
       File scriptFile = new File(scriptFilePath);
+      File parentDir = scriptFile.getParentFile();
+      if (!parentDir.exists()) {
+        parentDir.mkdirs();
+      }
       if (scriptFile.exists()) {
         FileInputStream fis = new FileInputStream(scriptFilePath);
         BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
@@ -166,19 +206,13 @@ public class Manager {
             // break down process and try to recover
           }
         }
+        reader.close();
       }
     } catch (IOException e) {
       e.printStackTrace();
       return false;
     }
     return true;
-  }
-
-  public void saveState() {
-    persist(null);
-    for (Database db : databases.values()) {
-      db.saveState();
-    }
   }
 
   private static class ManagerHolder {

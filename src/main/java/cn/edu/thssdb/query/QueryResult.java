@@ -1,5 +1,6 @@
 package cn.edu.thssdb.query;
 
+import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.ColumnFullName;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.schema.Column;
@@ -22,6 +23,7 @@ public class QueryResult {
   private Table resultTable;
 
   public QueryResult(
+      LockManager lockManager,
       QueryTable[] queryTables,
       ArrayList<ColumnFullName> resultColumns,
       MultipleConditions conditions) {
@@ -30,6 +32,9 @@ public class QueryResult {
     ArrayList<Column> columns = queryTables[0].getColumns();
     resultTable =
         new Table(null, null, columns.toArray(new Column[0]), queryTables[0].getPrimaryIndex());
+
+//    resultTable.useWriteLock(lockManager, "QueryTable");
+
     for (QueryTable queryTable : queryTables) {
       maskIndex = maskColumns(queryTable, resultColumns);
       for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
@@ -44,8 +49,16 @@ public class QueryResult {
           entries.add(row.getEntries().get(integer));
         }
         Row newRow = new Row(entries.toArray(new Entry[0]));
-        resultTable.insert(newRow);
+        resultTable.insertWithoutLock(newRow);
       }
+    }
+
+    /* for debug use */
+    try {
+//      System.out.println("Select sleep 5 secs");
+      Thread.sleep(5000);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 

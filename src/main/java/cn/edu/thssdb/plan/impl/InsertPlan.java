@@ -1,5 +1,6 @@
 package cn.edu.thssdb.plan.impl;
 
+import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.schema.Database;
 import cn.edu.thssdb.schema.Entry;
@@ -32,7 +33,7 @@ public class InsertPlan extends LogicalPlan {
     return columnNames;
   }
 
-  public void doInsert(Database database) {
+  public void doInsert(LockManager lockManager, Database database) {
     Table table = database.getTableByName(tableName);
 
     for (ArrayList<String> valueNames : valuess) {
@@ -81,7 +82,7 @@ public class InsertPlan extends LogicalPlan {
         }
       }
       Row row = new Row(entries.toArray(new Entry[0]));
-      table.insert(row);
+      table.insert(lockManager, row);
     }
   }
 

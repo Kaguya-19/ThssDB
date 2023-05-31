@@ -1,5 +1,6 @@
 package cn.edu.thssdb.plan.impl;
 
+import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.schema.Database;
@@ -37,7 +38,7 @@ public class UpdatePlan extends LogicalPlan {
     return value;
   }
 
-  public void doUpdate(Database database) {
+  public void doUpdate(LockManager lockManager, Database database) {
     Table table = database.getTableByName(tableName);
     ArrayList<Entry> entries = new ArrayList<>();
     for (Iterator<Row> it = table.iterator(); it.hasNext(); ) {
@@ -46,12 +47,12 @@ public class UpdatePlan extends LogicalPlan {
         if (conditions.check(row, table)) {
           Row newRow = new Row(row);
           newRow.update(columnName, value, table);
-          table.update(row, newRow);
+          table.update(lockManager, row, newRow);
         }
       } else {
         Row newRow = new Row(row);
         newRow.update(columnName, value, table);
-        table.update(row, newRow);
+        table.update(lockManager, row, newRow);
       }
     }
   }

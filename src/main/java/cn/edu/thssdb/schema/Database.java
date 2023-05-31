@@ -15,41 +15,38 @@ public class Database {
 
   private String databaseName; // check legal name
   private HashMap<String, Table> tables;
-  ReentrantReadWriteLock lock;
+  private static ReentrantReadWriteLock lock;
 
   public Database(String databaseName) {
     this.databaseName = databaseName;
     this.tables = new HashMap<>();
     this.lock = new ReentrantReadWriteLock();
-    //    recover();
   }
 
+  // TODO: need database lock?
   // Create table.
-  public void create(String tableName, Column[] columns, int primaryIndex) {
+  public void createTable(String tableName, Column[] columns, int primaryIndex) {
     if (tables.containsKey(tableName)) {
-      // Duplicate table name.
       throw new DuplicateTableException(tableName);
     }
+    columns[primaryIndex].setPrimary();
     Table table = new Table(this.databaseName, tableName, columns, primaryIndex);
     tables.put(tableName, table);
+    persist(tableName);
     System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
   }
 
-  // Drop table.
-  public void drop(String tableName) {
+  // TODO: need database lock
+  public void dropTable(String tableName) {
     if (!tables.containsKey(tableName)) {
       throw new TableNotExistException(tableName);
     }
     tables.remove(tableName);
+    dropTablePersist(tableName);
     System.out.println("[DEBUG] " + "Table " + tableName + " is dropped.");
   }
 
-  //  public String select(QueryTable[] queryTables) {
-  //    // TODO
-  //    QueryResult queryResult = new QueryResult(queryTables);
-  //    return null;
-  //  }
-
+  // TODO: need database lock
   public String getTables() {
     String tableNameList = "";
     System.out.println("[DEBUG] " + "Table count: " + tables.values().size());
@@ -72,43 +69,75 @@ public class Database {
     return tables.get(tableName);
   }
 
-  public void saveState() {
-    persist(null);
+  private void dropTablePersist(String tableName) {
+    String scriptFilePath =
+        Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
+    String pattern = "CREATE TABLE ".concat(tableName);
+    try {
+      File file = new File(scriptFilePath);
+      File tempFile =
+          new File(Global.MANAGER_DIR.concat(databaseName + File.separator + "temp.txt"));
+
+      BufferedReader reader = new BufferedReader(new FileReader(file));
+      BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+      String currentLine;
+      while ((currentLine = reader.readLine()) != null) {
+        if (!currentLine.startsWith(pattern)) {
+          writer.write(currentLine);
+          writer.newLine();
+        }
+      }
+      reader.close();
+      writer.close();
+
+      if (file.delete()) {
+        if (!tempFile.renameTo(file)) {
+          System.out.println("Failed to rename the temp file.");
+        }
+      } else {
+        System.out.println("Failed to delete the original file.");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
-  private void persist(String delTable) {
-
-    if (delTable != null && !delTable.isEmpty()) {
-      //      removeTableFile(delTable);
-    } else {
-      System.out.println("No table is dropped.");
-    }
+  // Called when modified
+  private void persist(String tableName) {
 
     // update manager.script
     String scriptFilePath =
         Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
     try {
       File scriptFile = new File(scriptFilePath);
-      if (scriptFile.exists()) {
-        scriptFile.delete();
+      if (!scriptFile.exists()) {
+        scriptFile.createNewFile();
       }
-      scriptFile.createNewFile();
 
       // update table properties
       FileOutputStream fos = new FileOutputStream(scriptFilePath);
       OutputStreamWriter writer = new OutputStreamWriter(fos);
-      for (String tableName : tables.keySet()) {
-        Table table = tables.get(tableName);
-        String buffer = "CREATE TABLE ".concat(tableName + '(');
-        String primary = "";
-        for (Column column : table.columns) {
-          if (column.isPrimary()) primary = column.getName();
-          buffer = buffer.concat(column.toCommand() + ',');
-        }
-        buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
-        writer.write(buffer);
-        // TODO: create or modify table file
+      Table table = tables.get(tableName);
+      String buffer = "CREATE TABLE ".concat(tableName + '(');
+      String primary = "";
+      for (Column column : table.columns) {
+        if (column.isPrimary()) primary = column.getName();
+        buffer = buffer.concat(column.toCommand() + ',');
       }
+      buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
+      writer.write(buffer);
+
+      //      for (String tableName : tables.keySet()) {
+      //        Table table = tables.get(tableName);
+      //        String buffer = "CREATE TABLE ".concat(tableName + '(');
+      //        String primary = "";
+      //        for (Column column : table.columns) {
+      //          if (column.isPrimary()) primary = column.getName();
+      //          buffer = buffer.concat(column.toCommand() + ',');
+      //        }
+      //        buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
+      //        writer.write(buffer);
+      //      }
       writer.close();
       fos.close();
 
@@ -131,8 +160,9 @@ public class Database {
           LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String tableName = ((CreateTablePlan) plan).getTableName();
           int pk = ((CreateTablePlan) plan).getPrimary();
-          create(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk);
+          createTable(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk);
         }
+        reader.close();
       }
     } catch (Exception e) {
       e.printStackTrace();

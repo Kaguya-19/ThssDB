@@ -28,7 +28,20 @@ sqlStmt :
     | showDbStmt
     | showTableStmt
     | quitStmt
-    | updateStmt ;
+    | updateStmt
+    | beginTransactionStmt
+    | commitStmt
+    | setTransactionLevelStmt;
+
+beginTransactionStmt :
+    K_BEGIN K_TRANSACTION ;
+
+commitStmt :
+    K_COMMIT ;
+
+setTransactionLevelStmt :
+    K_SET K_TRANSACTION K_ISOLATION K_LEVEL ( K_SERIALIZABLE | K_READ K_COMMITTED ) ;
+
 
 createDbStmt :
     K_CREATE K_DATABASE databaseName ;
@@ -225,6 +238,15 @@ K_USER : U S E R;
 K_VALUES : V A L U E S;
 K_VIEW : V I E W;
 K_WHERE : W H E R E;
+
+K_BEGIN : B E G I N;
+K_TRANSACTION : T R A N S A C T I O N;
+K_COMMIT : C O M M I T;
+K_ISOLATION : I S O L A T I O N;
+K_LEVEL : L E V E L;
+K_SERIALIZABLE : S E R I A L I Z A B L E;
+K_READ : R E A D;
+K_COMMITTED : C O M M I T T E D;
 
 IDENTIFIER :
     [a-zA-Z_] [a-zA-Z_0-9]* ;

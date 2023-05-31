@@ -25,5 +25,8 @@ public abstract class LogicalPlan {
     INSERT,
     DELETE,
     UPDATE,
+    BEGIN_TRANSACTION,
+    COMMIT,
+    SET_TRANSACTION_ISOLATION_LEVEL,
   }
 }

@@ -1,5 +1,6 @@
 package cn.edu.thssdb.service;
 
+import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.plan.impl.*;
@@ -19,7 +20,7 @@ import cn.edu.thssdb.utils.Global;
 import cn.edu.thssdb.utils.StatusUtil;
 import org.apache.thrift.TException;
 
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // import cn.edu.thssdb.schema.Database; //?
@@ -28,9 +29,11 @@ public class IServiceHandler implements IService.Iface {
 
   private static final AtomicInteger sessionCnt = new AtomicInteger(0);
   private final Manager manager;
+  private final Map<Long, LockManager> lockManagerList;
 
   public IServiceHandler() {
     manager = Manager.getInstance();
+    lockManagerList = new HashMap<>();
   }
 
   @Override
@@ -60,34 +63,40 @@ public class IServiceHandler implements IService.Iface {
     }
     // TODO: implement execution logic
     LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(req.statement);
-    String name, msg;
-    boolean executeSuccess = false;
-    System.out.println("[DEBUG] " + plan);
+    String name, msg = null;
+    boolean isInterrupted = false;
+
+    LockManager lockManager;
+    lockManagerList.computeIfAbsent(req.sessionId, LockManager::new);
+    lockManager = lockManagerList.get(req.sessionId);
+
+    System.out.println("[DEBUG] Plan:" + plan);
     try {
       switch (plan.getType()) {
-        case QUIT:
-          manager.saveState();
-          msg = ((QuitPlan) plan).toString();
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          //        case QUIT:
+          //          manager.saveState();
+          //          msg = ((QuitPlan) plan).toString();
+          //          return new ExecuteStatementResp(StatusUtil.success(msg), false);
 
         case CREATE_DB:
           name = ((CreateDatabasePlan) plan).getDatabaseName();
           msg = "Database " + name + " is created.";
           boolean used = manager.createDatabaseIfNotExists(name);
           if (used) msg = msg.concat("\nDatabase " + name + " is activated.");
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          break;
 
         case DROP_DB:
           name = ((DropDatabasePlan) plan).getDatabaseName();
           msg = "Database " + name + " is dropped.";
           manager.deleteDatabase(name);
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          break;
 
         case USE_DB:
+          // TODO: need to separate clients using which database
           name = ((UseDatabasePlan) plan).getDatabaseName();
           msg = "Database " + name + " is activated.";
           manager.switchDatabase(name);
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          break;
 
         case CREATE_TABLE:
           name = ((CreateTablePlan) plan).getTableName();
@@ -95,58 +104,108 @@ public class IServiceHandler implements IService.Iface {
           int pk = ((CreateTablePlan) plan).getPrimary();
           manager
               .getCurrentDatabase()
-              .create(name, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk); // ??
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+              .createTable(
+                  name, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk); // ??
+          break;
 
         case DROP_TABLE:
-          System.out.println("show table");
           name = ((DropTablePlan) plan).getTableName();
           msg = "Table " + name + " is dropped.";
-          manager.getCurrentDatabase().drop(name);
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          manager.getCurrentDatabase().dropTable(name);
+          break;
 
         case SHOW_TABLE:
           name = ((ShowTablePlan) plan).getTableName();
           msg = manager.getDatabase(name).getTables();
-          return new ExecuteStatementResp(StatusUtil.success(msg), false);
+          break;
 
         case INSERT:
           try {
-            ((InsertPlan) plan).doInsert(manager.getCurrentDatabase());
+            ((InsertPlan) plan)
+                .doInsert(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
           } catch (Exception e) {
-            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+            isInterrupted = true;
+            msg = e.getMessage();
+            break;
+            //            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
           }
-          return new ExecuteStatementResp(StatusUtil.success("insert"), false);
+          msg = "insert";
+          //          return new ExecuteStatementResp(StatusUtil.success("insert"), false);
+          break;
 
         case DELETE:
           try {
-            ((DeletePlan) plan).doDelete(manager.getCurrentDatabase());
+            ((DeletePlan) plan)
+                .doDelete(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
           } catch (Exception e) {
-            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+            isInterrupted = true;
+            msg = e.getMessage();
+            break;
           }
-          return new ExecuteStatementResp(StatusUtil.success("delete"), false);
+          msg = "delete";
+          break;
 
         case UPDATE:
           try {
-            ((UpdatePlan) plan).doUpdate(manager.getCurrentDatabase());
+            ((UpdatePlan) plan)
+                .doUpdate(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
           } catch (Exception e) {
-            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+            isInterrupted = true;
+            msg = e.getMessage();
+            System.out.println("update exception");
+            break;
           }
-          return new ExecuteStatementResp(StatusUtil.success("update"), false);
+          msg = "update";
+          break;
 
         case SELECT:
           try {
-            String result = ((SelectPlan) plan).doSelect(manager.getCurrentDatabase());
-            return new ExecuteStatementResp(StatusUtil.success(result), false);
+            msg =
+                ((SelectPlan) plan)
+                    .doSelect(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
+            break;
           } catch (Exception e) {
-            return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+            isInterrupted = true;
+            msg = e.getMessage();
+            break;
           }
+
+        case BEGIN_TRANSACTION:
+          lockManager.beginTransaction();
+          msg = "begin transaction";
+          break;
+
+        case COMMIT:
+          lockManager.commit();
+          msg = "committed";
+          break;
+
+        case SET_TRANSACTION_ISOLATION_LEVEL:
+          lockManager.setTransactionMode(((SetTransactionIsolationLevelPlan)plan).getMode());
+          msg = "Transaction isolation mode switch to: " + lockManager.getMode();
+          break;
 
         default:
       }
     } catch (Exception e) {
-      return new ExecuteStatementResp(StatusUtil.fail(e.getMessage()), false);
+      msg = e.getMessage();
+      isInterrupted = true;
     }
+
+    // single statement auto commit
+    if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
+      System.out.println("Auto commit.");
+      lockManager.commit();
+    }
+
+    if (isInterrupted) {
+      return new ExecuteStatementResp(StatusUtil.fail(msg), false);
+    } else if (msg != null) {
+      return new ExecuteStatementResp(StatusUtil.success(msg), false);
+    }
+
+    // TODO: release all lock in lock manager before return
+
     return null;
     //    return new ExecuteStatementResp(StatusUtil.fail("Unknown statement, please try again."),
     // false);

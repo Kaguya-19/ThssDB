@@ -38,6 +38,7 @@ cn\edu\thssdb\rpc\thrift\IService$AsyncClient$getTime_call.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementResp$ExecuteStatementRespTupleSchemeFactory.class
 cn\edu\thssdb\plan\LogicalPlan.class
 cn\edu\thssdb\sql\SQLParser$SelectStmtContext.class
+cn\edu\thssdb\sql\SQLParser$SetTransactionLevelStmtContext.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementReq.class
 cn\edu\thssdb\rpc\thrift\GetTimeReq$GetTimeReqTupleScheme.class
 cn\edu\thssdb\parser\Expressions.class
@@ -105,6 +106,7 @@ cn\edu\thssdb\rpc\thrift\IService$disconnect_args$disconnect_argsStandardScheme.
 cn\edu\thssdb\sql\SQLParser$DatabaseNameContext.class
 cn\edu\thssdb\sql\SQLParser$ShowTableStmtContext.class
 cn\edu\thssdb\utils\StatusUtil.class
+cn\edu\thssdb\LockManager.class
 cn\edu\thssdb\query\QueryResult.class
 cn\edu\thssdb\parser\SQLParseError.class
 cn\edu\thssdb\schema\Table$TableIterator.class
@@ -114,11 +116,13 @@ cn\edu\thssdb\sql\SQLParser$DropUserStmtContext.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor$disconnect.class
 cn\edu\thssdb\rpc\thrift\IService$executeStatement_args.class
 cn\edu\thssdb\index\BPlusTreeNode.class
+cn\edu\thssdb\plan\impl\BeginTransactionPlan.class
 cn\edu\thssdb\sql\SQLListener.class
 cn\edu\thssdb\query\QueryTable.class
 cn\edu\thssdb\plan\impl\ShowTablePlan.class
 cn\edu\thssdb\rpc\thrift\ConnectResp.class
 cn\edu\thssdb\sql\SQLParser$LiteralValueContext.class
+cn\edu\thssdb\sql\SQLParser$BeginTransactionStmtContext.class
 cn\edu\thssdb\rpc\thrift\IService$connect_args$connect_argsTupleSchemeFactory.class
 cn\edu\thssdb\sql\SQLParser$ShowDbStmtContext.class
 cn\edu\thssdb\rpc\thrift\GetTimeReq$_Fields.class
@@ -150,6 +154,7 @@ cn\edu\thssdb\rpc\thrift\IService$getTime_result$getTime_resultTupleScheme.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementReq$ExecuteStatementReqTupleSchemeFactory.class
 cn\edu\thssdb\rpc\thrift\DisconnectReq.class
 cn\edu\thssdb\parser\ThssDBSQLVisitor.class
+cn\edu\thssdb\plan\impl\CommitPlan.class
 cn\edu\thssdb\rpc\thrift\IService$executeStatement_result.class
 cn\edu\thssdb\rpc\thrift\DisconnectResp$_Fields.class
 cn\edu\thssdb\rpc\thrift\GetTimeReq$GetTimeReqStandardScheme.class
@@ -165,6 +170,7 @@ cn\edu\thssdb\parser\Condition.class
 cn\edu\thssdb\rpc\thrift\GetTimeResp$GetTimeRespTupleSchemeFactory.class
 cn\edu\thssdb\rpc\thrift\DisconnectResp.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementResp$ExecuteStatementRespStandardSchemeFactory.class
+cn\edu\thssdb\sql\SQLParser$CommitStmtContext.class
 cn\edu\thssdb\rpc\thrift\IService$executeStatement_result$executeStatement_resultStandardScheme.class
 cn\edu\thssdb\server\ThssDB$ThssDBHolder.class
 cn\edu\thssdb\utils\Pair.class
