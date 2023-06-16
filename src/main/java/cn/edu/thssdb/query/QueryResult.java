@@ -54,12 +54,12 @@ public class QueryResult {
     }
 
     /* for debug use */
-    try {
-      //      System.out.println("Select sleep 5 secs");
-      Thread.sleep(5000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+//    try {
+//      //      System.out.println("Select sleep 5 secs");
+//      Thread.sleep(5000);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
   }
 
   private ArrayList<Integer> maskColumns(
