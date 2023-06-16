@@ -218,11 +218,12 @@ public class Manager {
           LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String dbName = ((CreateDatabasePlan) plan).getDatabaseName();
           createDatabaseIfNotExists(dbName);
-          if (!databases.get(dbName).recover()) {
-            // break down process and try to recover
-          }
         }
         reader.close();
+
+        for (Database db : databases.values()) {
+          db.recover();
+        }
       }
     } catch (IOException e) {
       e.printStackTrace();

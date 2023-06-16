@@ -31,7 +31,7 @@ public class Table implements Iterable<Row> {
     this.tablePath = Global.TABLE_DIR + databaseName + File.separator + tableName + ".table";
   }
 
-  private void persist() {
+  public void persist() {
     // TODO
     try {
       serialize();
@@ -52,7 +52,7 @@ public class Table implements Iterable<Row> {
     }
   }
 
-  private void recover() {
+  public void recover() {
     // TODO
     if (new File(tablePath).exists()) {
       load();
@@ -60,21 +60,25 @@ public class Table implements Iterable<Row> {
   }
 
   public void insert(LockManager lockManager, Row row) {
-    if (!lock.isWriteLockedByCurrentThread()) {
-      //      System.out.println(this.hashCode() + " wait for write lock.");
-      //      System.out.println(this.hashCode() + " Read: " + lock.getReadHoldCount() + " Write: "
-      // + lock.getWriteHoldCount());
-      if (lock.getReadHoldCount() > 0) {
-        lock.readLock().unlock();
+    if (lockManager != null) {
+      if (!lock.isWriteLockedByCurrentThread()) {
+        //      System.out.println(this.hashCode() + " wait for write lock.");
+        //      System.out.println(this.hashCode() + " Read: " + lock.getReadHoldCount() + " Write:
+        // "
+        // + lock.getWriteHoldCount());
+        if (lock.getReadHoldCount() > 0) {
+          lock.readLock().unlock();
+        }
+        lock.writeLock().lock();
+        lockManager.recordLock(this.hashCode(), lock);
+        lockManager.recordTable(this);
+        //      System.out.println(this.hashCode() + " Insert get write lock. Write lock hold: " +
+        // lock.getWriteHoldCount());
+      } else {
+        //      System.out.println(
+        //          "Insert has this write lock. Write lock hold: " + lock.getWriteHoldCount());
+        //      lockManager.recordLock(this.hashCode(), lock);
       }
-      lock.writeLock().lock();
-      lockManager.recordLock(this.hashCode(), lock);
-      //      System.out.println(this.hashCode() + " Insert get write lock. Write lock hold: " +
-      // lock.getWriteHoldCount());
-    } else {
-      //      System.out.println(
-      //          "Insert has this write lock. Write lock hold: " + lock.getWriteHoldCount());
-      //      lockManager.recordLock(this.hashCode(), lock);
     }
 
     insertWithoutLock(row);
@@ -86,7 +90,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
-    persist();
+    //    persist();
   }
 
   public void insertWithoutLock(Row row) {
@@ -98,16 +102,19 @@ public class Table implements Iterable<Row> {
   }
 
   public void delete(LockManager lockManager, Row row) {
-    if (!lock.isWriteLockedByCurrentThread()) {
-      //      System.out.println("Delete wait for write lock.");
-      lock.writeLock().lock();
-      lockManager.recordLock(this.hashCode(), lock);
-      //      System.out.println(this.hashCode() + " Delete get write lock. Write lock hold: " +
-      // lock.getWriteHoldCount());
-    } else {
-      //      System.out.println(
-      //          "Delete has this write lock. Write lock hold: " + lock.getWriteHoldCount());
-      //      lockManager.recordLock(this.hashCode(), lock);
+    if (lockManager != null) {
+      if (!lock.isWriteLockedByCurrentThread()) {
+        //      System.out.println("Delete wait for write lock.");
+        lock.writeLock().lock();
+        lockManager.recordLock(this.hashCode(), lock);
+        lockManager.recordTable(this);
+        //      System.out.println(this.hashCode() + " Delete get write lock. Write lock hold: " +
+        // lock.getWriteHoldCount());
+      } else {
+        //      System.out.println(
+        //          "Delete has this write lock. Write lock hold: " + lock.getWriteHoldCount());
+        //      lockManager.recordLock(this.hashCode(), lock);
+      }
     }
 
     deleteWithoutLock(row);
@@ -119,7 +126,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
-    persist();
+    //    persist();
   }
 
   public void deleteWithoutLock(Row row) {
@@ -127,15 +134,18 @@ public class Table implements Iterable<Row> {
   }
 
   public void update(LockManager lockManager, Row oldRow, Row newRow) {
-    if (!lock.isWriteLockedByCurrentThread()) {
-      //      System.out.println("Update wait for write lock.");
-      lock.writeLock().lock();
-      lockManager.recordLock(this.toString().hashCode(), lock);
-      //      System.out.println("Update get write lock. Write lock hold: " +
-      // lock.getWriteHoldCount());
-    } else {
-      //      System.out.println(
-      //          "Update has this write lock. Write lock hold: " + lock.getWriteHoldCount());
+    if (lockManager != null) {
+      if (!lock.isWriteLockedByCurrentThread()) {
+        //      System.out.println("Update wait for write lock.");
+        lock.writeLock().lock();
+        lockManager.recordLock(this.toString().hashCode(), lock);
+        lockManager.recordTable(this);
+        //      System.out.println("Update get write lock. Write lock hold: " +
+        // lock.getWriteHoldCount());
+      } else {
+        //      System.out.println(
+        //          "Update has this write lock. Write lock hold: " + lock.getWriteHoldCount());
+      }
     }
 
     deleteWithoutLock(oldRow);
@@ -148,7 +158,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
-    persist();
+    //    persist();
   }
 
   public void updateWithoutLock(Row oldRow, Row newRow) {
