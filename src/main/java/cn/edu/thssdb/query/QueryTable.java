@@ -12,7 +12,7 @@ import java.util.Iterator;
 public class QueryTable implements Iterator<Row> {
 
   private Iterator<Row> iterator;
-  Table resultTable;
+  public Table resultTable;
 
   public QueryTable(LockManager lockManager, Table originTable) {
     // deadlock here

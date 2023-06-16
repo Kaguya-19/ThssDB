@@ -118,7 +118,7 @@ public class IServiceHandler implements IService.Iface {
 
         case SHOW_TABLE:
           name = ((ShowTablePlan) plan).getTableName();
-          msg = manager.getDatabase(name).getTableByName(name).getTableStructure();
+          msg = manager.getCurrentDatabase().getTableByName(name).getTableStructure();
           break;
 
         case SHOW_ALL_TABLE:
@@ -172,10 +172,12 @@ public class IServiceHandler implements IService.Iface {
 
         case SELECT:
           try {
+            // DEBUG
             QueryResult resultTable =
                 ((SelectPlan) plan).doSelect(lockManager, manager.getCurrentDatabase());
             ExecuteStatementResp resp =
                 new ExecuteStatementResp(StatusUtil.success(resultTable.toString()), false);
+            System.out.println("select result: " + resultTable.toString());
             resp.setRowList(resultTable.getRowList());
             resp.setColumnsList(resultTable.getColumnsList());
             return resp;

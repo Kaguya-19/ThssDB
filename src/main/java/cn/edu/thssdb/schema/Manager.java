@@ -118,16 +118,17 @@ public class Manager {
         scriptFile.createNewFile();
       }
       FileOutputStream fos = new FileOutputStream(managerScriptPath);
-      OutputStreamWriter writer = new OutputStreamWriter(fos);
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
       writer.write("CREATE DATABASE ".concat(databaseName + "\n"));
 
-      String dirPath = Global.MANAGER_DIR.concat(databaseName);
-      File dir = new File(dirPath);
-      if (!dir.exists()) dir.mkdirs();
+      //      String dirPath = Global.MANAGER_DIR.concat(databaseName);
+      //      File dir = new File(dirPath);
+      //      if (!dir.exists()) dir.mkdirs();
 
       String dbScriptPath =
           Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
       File dbScript = new File(dbScriptPath);
+      if (!dbScript.getParentFile().exists()) dbScript.getParentFile().mkdirs();
       if (!dbScript.exists()) dbScript.createNewFile();
 
       // only add current db
@@ -147,6 +148,7 @@ public class Manager {
       //        File dbScript = new File(dbScriptPath);
       //        if (!dbScript.exists()) dbScript.createNewFile();
       //      }
+      writer.flush();
       writer.close();
       fos.close();
     } catch (IOException e) {

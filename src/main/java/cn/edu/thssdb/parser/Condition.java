@@ -47,7 +47,7 @@ public class Condition {
     int index = table.getColumnNames().indexOf(c1.getColumnName());
     Object v1 = row.getEntries().get(index).value;
     Column column = table.getColumns().get(index);
-    value = getEntryByType((String) value, column.getType());
+    value = getEntryByType(value.toString(), column.getType());
     switch (op) {
       case "=":
         return v1.equals(value);
