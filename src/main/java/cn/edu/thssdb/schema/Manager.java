@@ -118,7 +118,8 @@ public class Manager {
         scriptFile.createNewFile();
       }
       FileOutputStream fos = new FileOutputStream(managerScriptPath);
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+      FileWriter writer = new FileWriter(scriptFile, true);
+
       writer.write("CREATE DATABASE ".concat(databaseName + "\n"));
 
       //      String dirPath = Global.MANAGER_DIR.concat(databaseName);

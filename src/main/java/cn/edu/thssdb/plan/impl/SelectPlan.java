@@ -60,7 +60,7 @@ public class SelectPlan extends LogicalPlan {
     }
     // inner join all tables
     for (int i = 0; i < queryTables.size() - 1; i++) {
-      queryTables.get(i).join(lockManager, queryTables.get(i + 1).resultTable, null);
+      queryTables.get(i).join(lockManager, queryTables.get(i + 1), null);
     }
     this.queryTable = queryTables.get(0);
   }

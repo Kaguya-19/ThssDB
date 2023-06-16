@@ -5,6 +5,8 @@ import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 
+import java.util.ArrayList;
+
 import static cn.edu.thssdb.type.ColumnType.getEntryByType;
 
 public class Condition {
@@ -31,6 +33,68 @@ public class Condition {
       return checkLiteral(row, table);
     } else {
       return checkColumn(row, table);
+    }
+  }
+
+  public boolean check(Row row, ArrayList<Row> table, ArrayList<Column> columns) {
+    if (c2 == null) {
+      return checkLiteral(row, table, columns);
+    } else {
+      return checkColumn(row, table, columns);
+    }
+  }
+
+  public boolean checkLiteral(Row row, ArrayList<Row> table, ArrayList<Column> columns) {
+    ArrayList<String> columnNames = new ArrayList<>();
+    for (Column column : columns) {
+      columnNames.add(column.getName());
+    }
+    int index = columnNames.indexOf(c1.getColumnName());
+    Object v1 = row.getEntries().get(index).value;
+    Column column = columns.get(index);
+    value = getEntryByType(value.toString(), column.getType());
+    switch (op) {
+      case "=":
+        return v1.equals(value);
+      case ">":
+        return ((Comparable) v1).compareTo(value) > 0;
+      case "<":
+        return ((Comparable) v1).compareTo(value) < 0;
+      case ">=":
+        return ((Comparable) v1).compareTo(value) >= 0;
+      case "<=":
+        return ((Comparable) v1).compareTo(value) <= 0;
+      case "<>":
+        return !v1.equals(value);
+      default:
+        return false;
+    }
+  }
+
+  public boolean checkColumn(Row row, ArrayList<Row> table, ArrayList<Column> columns) {
+    ArrayList<String> columnNames = new ArrayList<>();
+    for (Column column : columns) {
+      columnNames.add(column.getName());
+    }
+    int index1 = columnNames.indexOf(c1.getColumnName());
+    int index2 = columnNames.indexOf(c2.getColumnName());
+    Object v1 = row.getEntries().get(index1).value;
+    Object v2 = row.getEntries().get(index2).value;
+    switch (op) {
+      case "=":
+        return v1.equals(v2);
+      case ">":
+        return ((Comparable) v1).compareTo(v2) > 0;
+      case "<":
+        return ((Comparable) v1).compareTo(v2) < 0;
+      case ">=":
+        return ((Comparable) v1).compareTo(v2) >= 0;
+      case "<=":
+        return ((Comparable) v1).compareTo(v2) <= 0;
+      case "<>":
+        return !v1.equals(v2);
+      default:
+        return false;
     }
   }
 
@@ -112,22 +176,22 @@ public class Condition {
     Object v1, v2;
     Column column1, column2;
     if (oriMetaInfo.getTableName().equals(tableName1)) {
-      int index = oriMetaInfo.getColumns().indexOf(columnName1);
+      int index = oriMetaInfo.getColumnNames().indexOf(columnName1);
       v1 = oriRow.getEntries().get(index).value;
       column1 = oriMetaInfo.getColumns().get(index);
     } else if (joinMetaInfo.getTableName().equals(tableName1)) {
-      int index = joinMetaInfo.getColumns().indexOf(columnName1);
+      int index = joinMetaInfo.getColumnNames().indexOf(columnName1);
       v1 = joinRow.getEntries().get(index).value;
       column1 = joinMetaInfo.getColumns().get(index);
     } else {
       throw new RuntimeException("Table name not found");
     }
     if (oriMetaInfo.getTableName().equals(tableName2)) {
-      int index = oriMetaInfo.getColumns().indexOf(columnName2);
+      int index = oriMetaInfo.getColumnNames().indexOf(columnName2);
       v2 = oriRow.getEntries().get(index).value;
       column2 = oriMetaInfo.getColumns().get(index);
     } else if (joinMetaInfo.getTableName().equals(tableName2)) {
-      int index = joinMetaInfo.getColumns().indexOf(columnName2);
+      int index = joinMetaInfo.getColumnNames().indexOf(columnName2);
       v2 = joinRow.getEntries().get(index).value;
       column2 = joinMetaInfo.getColumns().get(index);
     } else {

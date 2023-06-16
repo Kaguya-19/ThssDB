@@ -16,6 +16,7 @@ public class DeletePlan extends LogicalPlan {
   public DeletePlan(String tableName, MultipleConditions conditions) {
     super(LogicalPlanType.DELETE);
     this.tableName = tableName;
+    this.conditions = conditions;
   }
 
   @Override

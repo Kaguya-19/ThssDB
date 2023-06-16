@@ -171,7 +171,11 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   @Override
   public ColumnFullName visitResultColumn(SQLParser.ResultColumnContext ctx) {
     if (ctx.getChildCount() == 1) {
-      return new ColumnFullName(ctx.getChild(0).getText(), null);
+      if (ctx.getChild(0).getText().equals("*")) {
+        return new ColumnFullName("*", null);
+      } else {
+        return visitColumnFullName(ctx.columnFullName());
+      }
     } else { // tableName '.' columnName or '*'
       return new ColumnFullName(ctx.getChild(2).getText(), ctx.getChild(0).getText());
     }
@@ -211,10 +215,10 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
   //
   @Override
   public Object visitCondition(SQLParser.ConditionContext ctx) {
-    if (visit(ctx.expression(0)) instanceof ColumnFullName) {
+    if (visit(ctx.expression(1)) instanceof ColumnFullName) {
       return new Condition(
           (ColumnFullName) visit(ctx.expression(0)),
-          visit(ctx.expression(1)),
+          (ColumnFullName) visit(ctx.expression(1)),
           ctx.getChild(1).getText());
     } else {
       return new Condition(

@@ -1,8 +1,11 @@
 package cn.edu.thssdb.parser;
 
 import cn.edu.thssdb.query.MetaInfo;
+import cn.edu.thssdb.schema.Column;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
+
+import java.util.ArrayList;
 
 public class MultipleConditions extends BinaryTree {
 
@@ -21,6 +24,20 @@ public class MultipleConditions extends BinaryTree {
     } else {
       boolean leftResult = left.postOrderTraverse(row, table);
       boolean rightResult = right.postOrderTraverse(row, table);
+      if (value.equals("AND")) {
+        return leftResult && rightResult;
+      } else {
+        return leftResult || rightResult;
+      }
+    }
+  }
+
+  private boolean postOrderTraverse(Row row, ArrayList<Row> Table, ArrayList<Column> columns) {
+    if (isLeaf()) {
+      return ((Condition) value).check(row, Table, columns);
+    } else {
+      boolean leftResult = left.postOrderTraverse(row, Table, columns);
+      boolean rightResult = right.postOrderTraverse(row, Table, columns);
       if (value.equals("AND")) {
         return leftResult && rightResult;
       } else {
@@ -50,5 +67,9 @@ public class MultipleConditions extends BinaryTree {
 
   public boolean check(Row row, Table table) {
     return postOrderTraverse(row, table);
+  }
+
+  public boolean check(Row row, ArrayList<Row> table, ArrayList<Column> columns) {
+    return postOrderTraverse(row, table, columns);
   }
 }

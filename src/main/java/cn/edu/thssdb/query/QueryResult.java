@@ -4,10 +4,7 @@ import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.ColumnFullName;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.schema.Column;
-import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
-import cn.edu.thssdb.schema.Table;
-import cn.edu.thssdb.utils.Cell;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,11 +13,10 @@ import java.util.List;
 
 public class QueryResult {
 
-  private List<MetaInfo> metaInfoInfos;
-  private List<Integer> index;
-  private List<Cell> attrs;
+  private ArrayList<Integer> index;
   private String msg;
-  private Table resultTable;
+  private QueryTable resultTable;
+  private ArrayList<Column> resultColumns;
 
   public QueryResult(
       LockManager lockManager,
@@ -28,44 +24,40 @@ public class QueryResult {
       ArrayList<ColumnFullName> resultColumns,
       MultipleConditions conditions) {
     // TODO
-    ArrayList<Integer> maskIndex = maskColumns(queryTable, resultColumns);
-    ArrayList<Column> columns = new ArrayList<>();
-    for (Integer integer : maskIndex) {
-      columns.add(queryTable.getColumns().get(integer));
-    }
-    resultTable =
-        new Table(null, null, columns.toArray(new Column[0]), queryTable.getPrimaryIndex());
+    this.index = maskColumns(queryTable, resultColumns);
+    this.resultTable = new QueryTable(lockManager);
 
-    //    resultTable.useWriteLock(lockManager, "QueryTable");
+    resultTable.useWriteLock(lockManager, "QueryTable");
 
     for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
-      ArrayList<Entry> entries = new ArrayList<>();
+      //      ArrayList<Entry> entries = new ArrayList<>();
       Row row = iterator.next();
       if (conditions != null) {
-        if (!conditions.check(row, queryTable.resultTable)) {
+        if (!conditions.check(row, queryTable.resultTable, queryTable.resultColumns)) {
           continue;
         }
       }
-      for (Integer integer : maskIndex) {
-        entries.add(row.getEntries().get(integer));
-      }
-      Row newRow = new Row(entries.toArray(new Entry[0]));
-      resultTable.insertWithoutLock(newRow);
+      //      for (Integer integer : maskIndex) {
+      //        entries.add(row.getEntries().get(integer));
+      //      }
+      //      Row newRow = new Row(entries.toArray(new Entry[0]));
+      resultTable.resultTable.add(row);
     }
 
-    /* for debug use */
-    try {
-      //      System.out.println("Select sleep 5 secs");
-      Thread.sleep(5000);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    //    /* for debug use */
+    //    try {
+    //      //      System.out.println("Select sleep 5 secs");
+    //      Thread.sleep(5000);
+    //    } catch (Exception e) {
+    //      e.printStackTrace();
+    //    }
   }
 
   private ArrayList<Integer> maskColumns(
       QueryTable queryTable, ArrayList<ColumnFullName> resultColumns) {
 
     ArrayList<Column> columns = queryTable.getColumns();
+    this.resultColumns = columns;
     ArrayList<Integer> index = new ArrayList<>();
     if (resultColumns == null
         || resultColumns.size() == 0
@@ -102,9 +94,10 @@ public class QueryResult {
       // TODO:optimize O(n^2) is ugly
       for (int i = 0; i < columnNames.size(); i++) {
         for (int j = i + 1; j < columnNames.size(); j++) {
-          if (columnNames.get(i).equals(columnNames.get(j))) {
-            throw new RuntimeException("Column with same name exists!");
-          }
+          // TODO: allow same name in different tables
+          // if (columnNames.get(i).equals(columnNames.get(j))) {
+          //   throw new RuntimeException("Column with same name exists!");
+          // }
         }
       }
     }
@@ -122,16 +115,12 @@ public class QueryResult {
     return null;
   }
 
-  public Table getResultTable() {
-    return resultTable;
-  }
-
   public List<List<String>> getRowList() {
     List<List<String>> rows = new ArrayList<>();
-    for (Row row : resultTable) {
+    for (Row row : resultTable.resultTable) {
       List<String> rowString = new ArrayList<>();
-      for (Entry entry : row.getEntries()) {
-        rowString.add(entry.toString());
+      for (int i : index) {
+        rowString.add(row.getEntries().get(i).toString());
       }
       rows.add(rowString);
     }
@@ -140,8 +129,9 @@ public class QueryResult {
 
   public List<String> getColumnsList() {
     List<String> columns = new ArrayList<>();
-    for (Column column : resultTable.getColumns()) {
-      columns.add(column.getName());
+
+    for (int i : index) {
+      columns.add(resultColumns.get(i).getName());
     }
     return columns;
   }
@@ -149,14 +139,15 @@ public class QueryResult {
   public String toString() {
     // Print Column Names
     StringBuilder stringBuilder = new StringBuilder();
-    for (Column column : resultTable.getColumns()) {
-      stringBuilder.append(column.getName()).append(" ");
-    }
+    getColumnsList().forEach(column -> stringBuilder.append(column).append(", "));
+    stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
     stringBuilder.append("\n");
-    // Print Rows
-    for (Row row : resultTable) {
-      stringBuilder.append(row.toString()).append("\n");
-    }
+    getRowList()
+        .forEach(
+            row ->
+                stringBuilder
+                    .append(row.toString().substring(1, row.toString().length() - 1))
+                    .append("\n"));
     return stringBuilder.toString();
   }
 }
