@@ -5,6 +5,7 @@ import cn.edu.thssdb.exception.DatabaseNotSelectedException;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.plan.impl.*;
+import cn.edu.thssdb.query.QueryResult;
 import cn.edu.thssdb.rpc.thrift.ConnectReq;
 import cn.edu.thssdb.rpc.thrift.ConnectResp;
 import cn.edu.thssdb.rpc.thrift.DisconnectReq;
@@ -172,10 +173,16 @@ public class IServiceHandler implements IService.Iface {
 
         case SELECT:
           try {
-            msg =
+            QueryResult resultTable =
                 ((SelectPlan) plan)
                     .doSelect(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
-            break;
+            ExecuteStatementResp resp =
+                new ExecuteStatementResp(StatusUtil.success(resultTable.toString()), false);
+            resp.setRowList(resultTable.getRowList());
+            resp.setColumnsList(resultTable.getColumnsList());
+            return resp;
+
+            //            break;
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();

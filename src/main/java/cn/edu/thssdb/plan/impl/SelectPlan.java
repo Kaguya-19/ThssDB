@@ -59,12 +59,10 @@ public class SelectPlan extends LogicalPlan {
     }
   }
 
-  public String doSelect(LockManager lockManager, Database database) {
+  public QueryResult doSelect(LockManager lockManager, Database database) {
     generateQueryTable(lockManager, database);
-    queryResult =
-        new QueryResult(
-            lockManager, queryTables.toArray(new QueryTable[0]), resultColumns, conditions);
+    return new QueryResult(
+        lockManager, queryTables.toArray(new QueryTable[0]), resultColumns, conditions);
     // Print the result
-    return queryResult.print();
   }
 }

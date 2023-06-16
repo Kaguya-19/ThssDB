@@ -152,8 +152,11 @@ public class ThssDBSQLVisitor extends SQLBaseVisitor {
 
   @Override
   public LogicalPlan visitSelectStmt(SQLParser.SelectStmtContext ctx) {
-    // TODO:MultipleConditions ?
-    MultipleConditions conditions = (MultipleConditions) visit(ctx.multipleCondition());
+    // TODO:MultipleConditions
+    MultipleConditions conditions = null;
+    if (ctx.multipleCondition() != null) {
+      conditions = (MultipleConditions) visit(ctx.multipleCondition());
+    }
     ArrayList<ColumnFullName> resultColumns = new ArrayList<>();
     ArrayList<TableQuery> tableQueries = new ArrayList<>();
     for (SQLParser.ResultColumnContext context : ctx.resultColumn()) {

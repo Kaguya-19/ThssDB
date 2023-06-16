@@ -126,7 +126,27 @@ public class QueryResult {
     return resultTable;
   }
 
-  public String print() {
+  public List<List<String>> getRowList() {
+    List<List<String>> rows = new ArrayList<>();
+    for (Row row : resultTable) {
+      List<String> rowString = new ArrayList<>();
+      for (Entry entry : row.getEntries()) {
+        rowString.add(entry.toString());
+      }
+      rows.add(rowString);
+    }
+    return rows;
+  }
+
+  public List<String> getColumnsList() {
+    List<String> columns = new ArrayList<>();
+    for (Column column : resultTable.getColumns()) {
+      columns.add(column.getName());
+    }
+    return columns;
+  }
+
+  public String toString() {
     // Print Column Names
     StringBuilder stringBuilder = new StringBuilder();
     for (Column column : resultTable.getColumns()) {

@@ -31,9 +31,13 @@ public class Table implements Iterable<Row> {
     this.tablePath = Global.TABLE_DIR + databaseName + File.separator + tableName + ".table";
   }
 
-  private void persist() throws IOException {
+  private void persist() {
     // TODO
-    serialize();
+    try {
+      serialize();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void load() {
@@ -82,6 +86,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
+    persist();
   }
 
   public void insertWithoutLock(Row row) {
@@ -114,6 +119,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
+    persist();
   }
 
   public void deleteWithoutLock(Row row) {
@@ -142,6 +148,7 @@ public class Table implements Iterable<Row> {
     //    }
 
     /* release write lock when committed */
+    persist();
   }
 
   public void updateWithoutLock(Row oldRow, Row newRow) {
@@ -202,6 +209,10 @@ public class Table implements Iterable<Row> {
     // TODO
     File file = new File(tablePath);
     if (!file.exists()) {
+      // if directory exists?
+      if (!file.getParentFile().exists()) {
+        file.getParentFile().mkdirs();
+      }
       file.createNewFile();
     }
     FileOutputStream fileOutputStream = new FileOutputStream(file);
