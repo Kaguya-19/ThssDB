@@ -17,6 +17,7 @@ public class SelectPlan extends LogicalPlan {
   private ArrayList<TableQuery> tableQueries;
   private MultipleConditions conditions;
   private ArrayList<QueryTable> queryTables;
+  private QueryTable queryTable;
   private QueryResult queryResult;
 
   public SelectPlan(
@@ -57,12 +58,16 @@ public class SelectPlan extends LogicalPlan {
       this.queryTables.add(queryTable);
       table.releaseReadLockIfReadCommitted(lockManager, "generateQueryTable");
     }
+    // inner join all tables
+    for (int i = 0; i < queryTables.size() - 1; i++) {
+      queryTables.get(i).join(lockManager, queryTables.get(i + 1).resultTable, null);
+    }
+    this.queryTable = queryTables.get(0);
   }
 
   public QueryResult doSelect(LockManager lockManager, Database database) {
     generateQueryTable(lockManager, database);
-    return new QueryResult(
-        lockManager, queryTables.toArray(new QueryTable[0]), resultColumns, conditions);
+    return new QueryResult(lockManager, queryTable, resultColumns, conditions);
     // Print the result
   }
 }

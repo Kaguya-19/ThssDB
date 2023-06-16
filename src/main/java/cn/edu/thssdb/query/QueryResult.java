@@ -24,33 +24,33 @@ public class QueryResult {
 
   public QueryResult(
       LockManager lockManager,
-      QueryTable[] queryTables,
+      QueryTable queryTable,
       ArrayList<ColumnFullName> resultColumns,
       MultipleConditions conditions) {
     // TODO
-    ArrayList<Integer> maskIndex = maskColumns(queryTables[0], resultColumns);
-    ArrayList<Column> columns = queryTables[0].getColumns();
+    ArrayList<Integer> maskIndex = maskColumns(queryTable, resultColumns);
+    ArrayList<Column> columns = new ArrayList<>();
+    for (Integer integer : maskIndex) {
+      columns.add(queryTable.getColumns().get(integer));
+    }
     resultTable =
-        new Table(null, null, columns.toArray(new Column[0]), queryTables[0].getPrimaryIndex());
+        new Table(null, null, columns.toArray(new Column[0]), queryTable.getPrimaryIndex());
 
     //    resultTable.useWriteLock(lockManager, "QueryTable");
 
-    for (QueryTable queryTable : queryTables) {
-      maskIndex = maskColumns(queryTable, resultColumns);
-      for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
-        ArrayList<Entry> entries = new ArrayList<>();
-        Row row = iterator.next();
-        if (conditions != null) {
-          if (!conditions.check(row, queryTable.resultTable)) {
-            continue;
-          }
+    for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
+      ArrayList<Entry> entries = new ArrayList<>();
+      Row row = iterator.next();
+      if (conditions != null) {
+        if (!conditions.check(row, queryTable.resultTable)) {
+          continue;
         }
-        for (Integer integer : maskIndex) {
-          entries.add(row.getEntries().get(integer));
-        }
-        Row newRow = new Row(entries.toArray(new Entry[0]));
-        resultTable.insertWithoutLock(newRow);
       }
+      for (Integer integer : maskIndex) {
+        entries.add(row.getEntries().get(integer));
+      }
+      Row newRow = new Row(entries.toArray(new Entry[0]));
+      resultTable.insertWithoutLock(newRow);
     }
 
     /* for debug use */

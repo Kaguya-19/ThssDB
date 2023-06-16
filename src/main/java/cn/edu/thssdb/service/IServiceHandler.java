@@ -173,11 +173,13 @@ public class IServiceHandler implements IService.Iface {
 
         case SELECT:
           try {
+            // DEBUG
             QueryResult resultTable =
                 ((SelectPlan) plan)
                     .doSelect(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
             ExecuteStatementResp resp =
                 new ExecuteStatementResp(StatusUtil.success(resultTable.toString()), false);
+            System.out.println("select result: " + resultTable.toString());
             resp.setRowList(resultTable.getRowList());
             resp.setColumnsList(resultTable.getColumnsList());
             return resp;
