@@ -118,7 +118,7 @@ public class Database {
 
       // update table properties
       FileOutputStream fos = new FileOutputStream(scriptFilePath);
-      OutputStreamWriter writer = new OutputStreamWriter(fos);
+      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
       Table table = tables.get(tableName);
       String buffer = "CREATE TABLE ".concat(tableName + '(');
       String primary = "";
@@ -140,6 +140,7 @@ public class Database {
       //        buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
       //        writer.write(buffer);
       //      }
+      writer.flush();
       writer.close();
       fos.close();
 

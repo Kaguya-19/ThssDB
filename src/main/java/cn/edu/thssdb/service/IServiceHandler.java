@@ -122,7 +122,7 @@ public class IServiceHandler implements IService.Iface {
 
         case SHOW_TABLE:
           name = ((ShowTablePlan) plan).getTableName();
-          msg = manager.getDatabase(name).getTableByName(name).getTableStructure();
+          msg = manager.getCurrentDatabase().getTableByName(name).getTableStructure();
           break;
 
         case SHOW_ALL_TABLE:
