@@ -1,0 +1,1 @@
+CREATE TABLE table0(a INT,PRIMARY KEY (a))
