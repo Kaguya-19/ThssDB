@@ -1,7 +1,6 @@
 package cn.edu.thssdb.service;
 
 import cn.edu.thssdb.LockManager;
-import cn.edu.thssdb.exception.DatabaseNotExistException;
 import cn.edu.thssdb.exception.DatabaseNotSelectedException;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;

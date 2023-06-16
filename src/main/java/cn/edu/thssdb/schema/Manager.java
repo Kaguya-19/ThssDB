@@ -166,8 +166,7 @@ public class Manager {
       String managerScriptPath = Global.MANAGER_DIR.concat("manager.script");
       String pattern = "CREATE DATABASE ".concat(databaseName);
       File file = new File(managerScriptPath);
-      File tempFile =
-          new File(Global.MANAGER_DIR.concat("manager.temp"));
+      File tempFile = new File(Global.MANAGER_DIR.concat("manager.temp"));
       if (tempFile.exists()) tempFile.delete();
       tempFile.createNewFile();
 

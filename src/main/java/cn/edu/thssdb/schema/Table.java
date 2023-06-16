@@ -284,11 +284,11 @@ public class Table implements Iterable<Row> {
     return new TableIterator(this);
   }
 
-    public String getTableStructure() {
-      String buffer = "\t" + tableName;
-      for (Column column : columns) {
-        buffer = buffer.concat("\n\t\t" + column.toString());
-      }
-      return buffer;
+  public String getTableStructure() {
+    String buffer = "\t" + tableName;
+    for (Column column : columns) {
+      buffer = buffer.concat("\n\t\t" + column.toString());
     }
+    return buffer;
+  }
 }
