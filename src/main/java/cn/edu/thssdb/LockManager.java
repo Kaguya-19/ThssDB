@@ -53,10 +53,10 @@ public class LockManager {
   }
 
   // can't release read lock
-  public void commit() {
+  public void commit(Long sessionId) {
     //    System.out.println("Transaction begin called: " + transactionState);
     for (Table table : tableList) {
-      table.persist();
+      table.persist(sessionId);
     }
     for (Integer key : lockTable.keySet()) {
       //      System.out.println(key);

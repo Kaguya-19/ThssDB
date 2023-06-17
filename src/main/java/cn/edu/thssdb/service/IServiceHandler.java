@@ -61,7 +61,7 @@ public class IServiceHandler implements IService.Iface {
     if (lockManager == null) {
       return new DisconnectResp(StatusUtil.fail("You are not connected. Please connect first."));
     }
-    lockManager.commit();
+    lockManager.commit(req.sessionId);
     lockManagerList.remove(req.sessionId);
     return new DisconnectResp(StatusUtil.success());
   }
@@ -204,7 +204,7 @@ public class IServiceHandler implements IService.Iface {
           break;
 
         case COMMIT:
-          lockManager.commit();
+          lockManager.commit(req.sessionId);
           manager.getCurrentDatabase().logger.cleanLog();
           msg = "committed";
           break;
@@ -215,7 +215,7 @@ public class IServiceHandler implements IService.Iface {
           break;
 
         case QUIT:
-          lockManager.commit();
+          lockManager.commit(req.sessionId);
           manager.getCurrentDatabase().logger.cleanLog();
           msg = "quit";
           break;
@@ -230,7 +230,7 @@ public class IServiceHandler implements IService.Iface {
     // single statement auto commit
     if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
       System.out.println("Auto commit.");
-      lockManager.commit();
+      lockManager.commit(req.sessionId);
       //      manager.getCurrentDatabase().logger.cleanLog();
     }
 

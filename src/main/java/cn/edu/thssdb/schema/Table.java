@@ -61,13 +61,9 @@ public class Table implements Iterable<Row> {
     }
   }
 
-  public void persist() {
+  public void persist(Long sessionId) {
     // TODO
-    try {
-      serialize();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    serialize(sessionId);
   }
 
   public void recover() {
@@ -238,29 +234,34 @@ public class Table implements Iterable<Row> {
     }
   }
 
-  private void serialize() throws IOException {
+  private void serialize(Long sessionId) {
     // TODO
     if (!this.lock.isWriteLockedByCurrentThread()) {
       return;
     }
-    index.bufferManager.writeAllDirty();
-    File directory = new File(tablePath);
-    if (!directory.exists()) {
-      directory.mkdirs();
-    }
-    File tableFile = new File(tablePath.concat("_index"));
-    if (!tableFile.exists()) {
-      tableFile.createNewFile();
-    }
-    if (index.pageCounter.updated) {
-      index.pageCounter.updated = false;
-      FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-      BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
-      ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
-      objectOutputStream.writeObject(index.pageCounter);
-      objectOutputStream.close();
-      bufferedOutputStream.close();
-      fileOutputStream.close();
+    try {
+      index.bufferManager.writeAllDirty();
+      File directory = new File(tablePath);
+      if (!directory.exists()) {
+        directory.mkdirs();
+      }
+      File tableFile = new File(tablePath.concat("_index"));
+      if (!tableFile.exists()) {
+        tableFile.createNewFile();
+      }
+      if (index.pageCounter.updated) {
+        index.pageCounter.updated = false;
+        FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
+        objectOutputStream.writeObject(index.pageCounter);
+        objectOutputStream.close();
+        bufferedOutputStream.close();
+        fileOutputStream.close();
+      }
+    } catch (Exception e) {
+      //      System.out.println(e.getMessage());
+      e.printStackTrace();
     }
   }
 
