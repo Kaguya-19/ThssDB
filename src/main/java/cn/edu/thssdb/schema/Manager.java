@@ -224,6 +224,10 @@ public class Manager {
           }
         }
         reader.close();
+
+        for (Database db : databases.values()) {
+          db.recover();
+        }
       }
     } catch (IOException e) {
       e.printStackTrace();

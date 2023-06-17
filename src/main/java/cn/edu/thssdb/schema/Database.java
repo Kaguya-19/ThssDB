@@ -1,13 +1,18 @@
 package cn.edu.thssdb.schema;
 
 import cn.edu.thssdb.Global;
+import cn.edu.thssdb.Logger;
 import cn.edu.thssdb.exception.DuplicateTableException;
 import cn.edu.thssdb.exception.TableNotExistException;
 import cn.edu.thssdb.plan.LogicalGenerator;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.plan.impl.CreateTablePlan;
+import cn.edu.thssdb.plan.impl.DeletePlan;
+import cn.edu.thssdb.plan.impl.InsertPlan;
+import cn.edu.thssdb.plan.impl.UpdatePlan;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -16,11 +21,14 @@ public class Database {
   private String databaseName; // check legal name
   private HashMap<String, Table> tables;
   private static ReentrantReadWriteLock lock;
+  public Logger logger;
 
   public Database(String databaseName) {
     this.databaseName = databaseName;
     this.tables = new HashMap<>();
     this.lock = new ReentrantReadWriteLock();
+    this.logger =
+        new Logger(Global.MANAGER_DIR.concat(databaseName + File.separator), databaseName);
   }
 
   // TODO: need database lock?
@@ -185,10 +193,38 @@ public class Database {
           }
         }
         reader.close();
+
+        for (Table table : tables.values()) {
+          table.recover();
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
       return false;
+    }
+
+    ArrayList<String> logs = logger.readLog();
+    for (String log : logs) {
+      try {
+        System.out.println(log);
+        LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(log);
+        switch (plan.getType()) {
+          case INSERT:
+            ((InsertPlan) plan).doInsert(null, this);
+            break;
+          case DELETE:
+            ((DeletePlan) plan).doDelete(null, this);
+            break;
+          case UPDATE:
+            ((UpdatePlan) plan).doUpdate(null, this);
+            break;
+          default:
+            System.out.println("fail to execute");
+            break;
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
     return true;
   }

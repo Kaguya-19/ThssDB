@@ -15,14 +15,14 @@ public class InsertPlan extends LogicalPlan {
 
   private String tableName;
   private ArrayList<String> columnNames;
-  private ArrayList<ArrayList<String>> valuess;
+  private ArrayList<ArrayList<String>> values;
 
   public InsertPlan(
-      String tableName, ArrayList<String> columnNames, ArrayList<ArrayList<String>> valuess) {
+      String tableName, ArrayList<String> columnNames, ArrayList<ArrayList<String>> values) {
     super(LogicalPlanType.INSERT);
     this.tableName = tableName;
     this.columnNames = columnNames;
-    this.valuess = valuess;
+    this.values = values;
   }
 
   public String getTableName() {
@@ -36,7 +36,7 @@ public class InsertPlan extends LogicalPlan {
   public void doInsert(LockManager lockManager, Database database) {
     Table table = database.getTableByName(tableName);
 
-    for (ArrayList<String> valueNames : valuess) {
+    for (ArrayList<String> valueNames : values) {
       ArrayList<Entry> entries = new ArrayList<>();
       if (columnNames == null
           || columnNames.size()

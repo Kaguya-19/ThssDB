@@ -17,6 +17,7 @@ import cn.edu.thssdb.rpc.thrift.GetTimeResp;
 import cn.edu.thssdb.rpc.thrift.IService;
 import cn.edu.thssdb.rpc.thrift.Status;
 import cn.edu.thssdb.schema.Column;
+import cn.edu.thssdb.schema.Database;
 import cn.edu.thssdb.schema.Manager;
 import cn.edu.thssdb.utils.Global;
 import cn.edu.thssdb.utils.StatusUtil;
@@ -75,11 +76,6 @@ public class IServiceHandler implements IService.Iface {
     System.out.println("[DEBUG] Plan:" + plan);
     try {
       switch (plan.getType()) {
-          //        case QUIT:
-          //          manager.saveState();
-          //          msg = ((QuitPlan) plan).toString();
-          //          return new ExecuteStatementResp(StatusUtil.success(msg), false);
-
         case CREATE_DB:
           name = ((CreateDatabasePlan) plan).getDatabaseName();
           msg = "Database " + name + " is created.";
@@ -134,8 +130,9 @@ public class IServiceHandler implements IService.Iface {
 
         case INSERT:
           try {
-            ((InsertPlan) plan)
-                .doInsert(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
+            Database db = manager.getCurrentDatabase();
+            ((InsertPlan) plan).doInsert(lockManager, db);
+            db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -148,8 +145,9 @@ public class IServiceHandler implements IService.Iface {
 
         case DELETE:
           try {
-            ((DeletePlan) plan)
-                .doDelete(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
+            Database db = manager.getCurrentDatabase();
+            ((DeletePlan) plan).doDelete(lockManager, db);
+            db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -160,8 +158,9 @@ public class IServiceHandler implements IService.Iface {
 
         case UPDATE:
           try {
-            ((UpdatePlan) plan)
-                .doUpdate(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
+            Database db = manager.getCurrentDatabase();
+            ((UpdatePlan) plan).doUpdate(lockManager, db);
+            db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -175,8 +174,7 @@ public class IServiceHandler implements IService.Iface {
           try {
             // DEBUG
             QueryResult resultTable =
-                ((SelectPlan) plan)
-                    .doSelect(lockManagerList.get(req.sessionId), manager.getCurrentDatabase());
+                ((SelectPlan) plan).doSelect(lockManager, manager.getCurrentDatabase());
             ExecuteStatementResp resp =
                 new ExecuteStatementResp(StatusUtil.success(resultTable.toString()), false);
             System.out.println("select result: " + resultTable.toString());
@@ -198,6 +196,7 @@ public class IServiceHandler implements IService.Iface {
 
         case COMMIT:
           lockManager.commit();
+          manager.getCurrentDatabase().logger.cleanLog();
           msg = "committed";
           break;
 
@@ -217,6 +216,7 @@ public class IServiceHandler implements IService.Iface {
     if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
       System.out.println("Auto commit.");
       lockManager.commit();
+      manager.getCurrentDatabase().logger.cleanLog();
     }
 
     if (isInterrupted) {
