@@ -25,3 +25,5 @@ hs_err_pid*
 *.table
 thssdb/table/
 thssdb/data/
+target/
+.vscode/
