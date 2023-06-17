@@ -76,7 +76,7 @@ public class Table implements Iterable<Row> {
     if (!dir.exists()) {
       dir.mkdirs();
     }
-    File tableFile = new File(tablePath + File.separator + tableName);
+    File tableFile = new File(tablePath.concat("_index"));
     if (!tableFile.exists()) {
       return;
     }
@@ -255,9 +255,11 @@ public class Table implements Iterable<Row> {
     if (index.pageCounter.updated) {
       index.pageCounter.updated = false;
       FileOutputStream fileOutputStream = new FileOutputStream(tableFile);
-      ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+      BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
       objectOutputStream.writeObject(index.pageCounter);
       objectOutputStream.close();
+      bufferedOutputStream.close();
       fileOutputStream.close();
     }
   }

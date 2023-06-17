@@ -72,7 +72,6 @@ public class BufferManager {
     assert buffer.size() == bufferPageIndex.size();
     assert buffer.size() == writeFlag.size();
     if (!found) System.out.println("No page to drop");
-
   }
 
   private ArrayList<Row> getPage(Integer pageIndex) {
@@ -99,8 +98,8 @@ public class BufferManager {
         return res;
       }
 
-      // BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
-      ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+      BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+      ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);
 
       Object inputObject;
       while (fileInputStream.available() > 0) {
@@ -108,8 +107,9 @@ public class BufferManager {
         res.add((Row) inputObject);
       }
 
-      fileInputStream.close();
       objectInputStream.close();
+      bufferedInputStream.close();
+      fileInputStream.close();
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();
     }
@@ -156,6 +156,7 @@ public class BufferManager {
       return new ArrayList<>(page);
     }
   }
+
   public void writeAllDirty() {
     assert tableLock.isWriteLockedByCurrentThread();
     assert buffer.size() == bufferPageIndex.size();
