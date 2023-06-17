@@ -52,7 +52,7 @@ public class Table implements Iterable<Row> {
     }
   }
 
-  private void recover() {
+  public void recover() {
     // TODO
     if (new File(tablePath).exists()) {
       load();

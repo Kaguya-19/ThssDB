@@ -117,8 +117,8 @@ public class Database {
       }
 
       // update table properties
-      FileOutputStream fos = new FileOutputStream(scriptFilePath);
-      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+      //      FileOutputStream fos = new FileOutputStream(scriptFilePath);
+      BufferedWriter writer = new BufferedWriter(new FileWriter(scriptFilePath, true));
       Table table = tables.get(tableName);
       String buffer = "CREATE TABLE ".concat(tableName + '(');
       String primary = "";
@@ -140,9 +140,9 @@ public class Database {
       //        buffer = buffer.concat(Column.toPrimary(primary) + ")\n");
       //        writer.write(buffer);
       //      }
-      writer.flush();
+      // writer.flush();
       writer.close();
-      fos.close();
+      //      fos.close();
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -163,7 +163,26 @@ public class Database {
           LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String tableName = ((CreateTablePlan) plan).getTableName();
           int pk = ((CreateTablePlan) plan).getPrimary();
-          createTable(tableName, ((CreateTablePlan) plan).getColumns().toArray(new Column[0]), pk);
+          // if has persist
+          if (new File(
+                  Global.TABLE_DIR.concat(databaseName + File.separator + tableName + ".table"))
+              .exists()) {
+            Table table =
+                new Table(
+                    this.databaseName,
+                    tableName,
+                    ((CreateTablePlan) plan).getColumns().toArray(new Column[0]),
+                    pk);
+            tables.put(tableName, table);
+            table.recover();
+            continue;
+          } else {
+            // if not has persist
+            Column[] columns = ((CreateTablePlan) plan).getColumns().toArray(new Column[0]);
+            columns[pk].setPrimary();
+            Table table = new Table(this.databaseName, tableName, columns, pk);
+            tables.put(tableName, table);
+          }
         }
         reader.close();
       }

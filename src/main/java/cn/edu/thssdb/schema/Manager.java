@@ -38,13 +38,12 @@ public class Manager {
     }
   }
 
-  public boolean createDatabaseIfNotExists(String databaseName) {
+  public boolean createDatabaseIfNotExists(String databaseName, boolean record) {
     if (!databases.containsKey(databaseName)) {
       Database database = new Database(databaseName);
       databases.put(databaseName, database);
       System.out.println("[DEBUG] " + "Database created");
-
-      persist(databaseName);
+      if (record) persist(databaseName);
 
       if (loadedDatabase == null) {
         switchDatabase(databaseName);
@@ -117,9 +116,8 @@ public class Manager {
       if (!scriptFile.exists()) {
         scriptFile.createNewFile();
       }
-      FileOutputStream fos = new FileOutputStream(managerScriptPath);
-      FileWriter writer = new FileWriter(scriptFile, true);
-
+      // FileOutputStream fos = new FileOutputStream(managerScriptPath);
+      BufferedWriter writer = new BufferedWriter(new FileWriter(managerScriptPath, true));
       writer.write("CREATE DATABASE ".concat(databaseName + "\n"));
 
       //      String dirPath = Global.MANAGER_DIR.concat(databaseName);
@@ -149,9 +147,9 @@ public class Manager {
       //        File dbScript = new File(dbScriptPath);
       //        if (!dbScript.exists()) dbScript.createNewFile();
       //      }
-      writer.flush();
+      // writer.flush();
       writer.close();
-      fos.close();
+      // fos.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -220,7 +218,7 @@ public class Manager {
         while ((line = reader.readLine()) != null) {
           LogicalPlan plan = (LogicalPlan) LogicalGenerator.generate(line);
           String dbName = ((CreateDatabasePlan) plan).getDatabaseName();
-          createDatabaseIfNotExists(dbName);
+          createDatabaseIfNotExists(dbName, false);
           if (!databases.get(dbName).recover()) {
             // break down process and try to recover
           }

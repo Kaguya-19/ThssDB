@@ -83,7 +83,7 @@ public class IServiceHandler implements IService.Iface {
         case CREATE_DB:
           name = ((CreateDatabasePlan) plan).getDatabaseName();
           msg = "Database " + name + " is created.";
-          boolean used = manager.createDatabaseIfNotExists(name);
+          boolean used = manager.createDatabaseIfNotExists(name, true);
           if (used) msg = msg.concat("\nDatabase " + name + " is activated.");
           break;
 
