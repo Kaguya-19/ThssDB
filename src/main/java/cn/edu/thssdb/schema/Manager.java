@@ -186,7 +186,7 @@ public class Manager {
         System.out.println("Failed to delete the original file.");
       }
 
-//      System.out.println("Folder and its contents deleted successfully.");
+      //      System.out.println("Folder and its contents deleted successfully.");
     } catch (IOException e) {
       e.printStackTrace();
     }

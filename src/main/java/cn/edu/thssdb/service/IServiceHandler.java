@@ -216,7 +216,7 @@ public class IServiceHandler implements IService.Iface {
     if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
       System.out.println("Auto commit.");
       lockManager.commit();
-//      manager.getCurrentDatabase().logger.cleanLog();
+      //      manager.getCurrentDatabase().logger.cleanLog();
     }
 
     if (isInterrupted) {

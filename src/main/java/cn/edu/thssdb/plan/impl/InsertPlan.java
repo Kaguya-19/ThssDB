@@ -66,20 +66,39 @@ public class InsertPlan extends LogicalPlan {
         // if the column is not given, use default value
 
         // check if the column name is valid
+        ArrayList<Integer> columnMask = new ArrayList<>();
         for (String columnName : columnNames) {
           if (!table.getColumnNames().contains(columnName)) {
             throw new RuntimeException("Column Error");
           }
-          if (valueNames.get(columnNames.indexOf(columnName)) == null) {
+          columnMask.add(table.getColumnNames().indexOf(columnName));
+        }
+        for (int i = 0; i < table.getColumns().size(); i++) {
+          if (!columnMask.contains(i)) {
             entries.add(new Entry(null));
           } else {
             entries.add(
                 new Entry(
                     getEntryByType(
-                        valueNames.get(columnNames.indexOf(columnName)),
-                        table.getColumnByName(columnName).getType())));
+                        valueNames.get(columnMask.indexOf(i)),
+                        table.getColumnByName(table.getColumnNames().get(i)).getType())));
           }
         }
+
+        //        for (String columnName : columnNames) {
+        //          if (!table.getColumnNames().contains(columnName)) {
+        //            throw new RuntimeException("Column Error");
+        //          }
+        //          if (valueNames.get(columnNames.indexOf(columnName)) == null) {
+        //            entries.add(new Entry(null));
+        //          } else {
+        //            entries.add(
+        //                new Entry(
+        //                    getEntryByType(
+        //                        valueNames.get(columnNames.indexOf(columnName)),
+        //                        table.getColumnByName(columnName).getType())));
+        //          }
+        //        }
       }
       Row row = new Row(entries.toArray(new Entry[0]));
       table.insert(lockManager, row);

@@ -1,7 +1,6 @@
 cn\edu\thssdb\plan\LogicalPlan$LogicalPlanType.class
 SQLParser$CreateTableStmtContext.class
 cn\edu\thssdb\sql\SQLParser$ParseContext.class
-cn\edu\thssdb\parser\SQL.g4
 cn\edu\thssdb\schema\Row.class
 cn\edu\thssdb\sql\SQLBaseVisitor.class
 cn\edu\thssdb\rpc\thrift\Status.class
@@ -91,7 +90,6 @@ SQLParser$ShowDbStmtContext.class
 cn\edu\thssdb\rpc\thrift\ConnectResp$_Fields.class
 cn\edu\thssdb\rpc\thrift\ExecuteStatementReq$ExecuteStatementReqStandardScheme.class
 cn\edu\thssdb\plan\impl\QuitPlan.class
-.DS_Store
 cn\edu\thssdb\rpc\thrift\IService$getTime_args$getTime_argsTupleSchemeFactory.class
 cn\edu\thssdb\type\AlignType.class
 cn\edu\thssdb\sql\SQLVisitor.class
@@ -169,7 +167,6 @@ SQLParser$ShowTableStmtContext.class
 SQLLexer.class
 SQLParser$TypeNameContext.class
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor$getTime$1.class
-cn\.DS_Store
 cn\edu\thssdb\rpc\thrift\ConnectResp$ConnectRespStandardSchemeFactory.class
 cn\edu\thssdb\plan\impl\CreateTablePlan.class
 cn\edu\thssdb\type\ColumnType$1.class
@@ -282,7 +279,6 @@ cn\edu\thssdb\Global.class
 cn\edu\thssdb\rpc\thrift\IService$executeStatement_args$executeStatement_argsTupleScheme.class
 SQLParser$ConditionContext.class
 cn\edu\thssdb\rpc\thrift\GetTimeResp$GetTimeRespStandardScheme.class
-cn\edu\.DS_Store
 cn\edu\thssdb\rpc\thrift\IService$AsyncProcessor.class
 SQLParser.class
 cn\edu\thssdb\sql\SQLParser$ValueEntryContext.class
