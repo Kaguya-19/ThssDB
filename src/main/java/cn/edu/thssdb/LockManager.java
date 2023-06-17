@@ -4,8 +4,6 @@ import cn.edu.thssdb.exception.TransactionOnProcessException;
 import cn.edu.thssdb.schema.Table;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

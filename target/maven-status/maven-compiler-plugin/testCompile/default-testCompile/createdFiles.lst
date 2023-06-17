@@ -9,7 +9,6 @@ cn\edu\thssdb\benchmark\common\PreparedStatement.class
 cn\edu\thssdb\benchmark\PerformanceTest.class
 cn\edu\thssdb\benchmark\generator\ConcurrentDataGenerator.class
 cn\edu\thssdb\benchmark\generator\PerformanceDataGenerator.class
-cn\edu\thssdb\index\BPlusTreeTest.class
 cn\edu\thssdb\benchmark\executor\PerformanceTestExecutor$Measurement.class
 cn\edu\thssdb\benchmark\transaction\ITransaction.class
 cn\edu\thssdb\benchmark\generator\BaseDataGenerator$Pair.class

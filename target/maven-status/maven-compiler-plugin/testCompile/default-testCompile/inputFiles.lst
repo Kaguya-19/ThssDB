@@ -22,7 +22,6 @@ D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\ConcurrentT
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\PerformanceTest.java
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\generator\ConcurrentDataGenerator.java
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\executor\PerformanceTestExecutor.java
-D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\index\BPlusTreeTest.java
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\executor\CRUDTestExecutor.java
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\common\Client.java
 D:\Working\Program\Java\ThssDB\src\test\java\cn\edu\thssdb\benchmark\generator\TransactionDataGenerator.java

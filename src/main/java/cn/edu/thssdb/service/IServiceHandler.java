@@ -82,7 +82,7 @@ public class IServiceHandler implements IService.Iface {
     lockManagerList.computeIfAbsent(req.sessionId, LockManager::new);
     lockManager = lockManagerList.get(req.sessionId);
 
-    System.out.println("[DEBUG] Plan:" + plan);
+    // System.out.println("[DEBUG] Plan:" + plan);
     try {
       switch (plan.getType()) {
         case CREATE_DB:
@@ -186,7 +186,7 @@ public class IServiceHandler implements IService.Iface {
                 ((SelectPlan) plan).doSelect(lockManager, manager.getCurrentDatabase());
             ExecuteStatementResp resp =
                 new ExecuteStatementResp(StatusUtil.success(resultTable.toString()), false);
-            System.out.println("select result: " + resultTable.toString());
+            // System.out.println("select result: " + resultTable.toString());
             resp.setRowList(resultTable.getRowList());
             resp.setColumnsList(resultTable.getColumnsList());
             return resp;
@@ -241,11 +241,10 @@ public class IServiceHandler implements IService.Iface {
     }
 
     // TODO: release all lock in lock manager before return
-//    lockManager.commit();
+    //    lockManager.commit();
 
     return null;
     //    return new ExecuteStatementResp(StatusUtil.fail("Unknown statement, please try again."),
     // false);
   }
-
 }

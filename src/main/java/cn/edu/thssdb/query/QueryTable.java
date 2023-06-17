@@ -228,19 +228,13 @@ public class QueryTable implements Iterator<Row> {
       //      System.out.println(user + " wait for write lock.");
       lock.writeLock().lock();
       lockManager.recordLock(this.hashCode(), lock);
-      System.out.println(
-          this.hashCode()
-              + " "
-              + user
-              + " get write lock. Write lock hold: "
-              + lock.getWriteHoldCount());
     } else {
-      System.out.println(
-          this.hashCode()
-              + " "
-              + user
-              + " has this write lock. Write lock hold: "
-              + lock.getWriteHoldCount());
+      // System.out.println(
+      //     this.hashCode()
+      //         + " "
+      //         + user
+      //         + " has this write lock. Write lock hold: "
+      //         + lock.getWriteHoldCount());
       //      lockManager.recordLock(this.hashCode(), lock);
     }
   }

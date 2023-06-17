@@ -20,7 +20,7 @@ public class BinaryTree {
     if (right != null) {
       right.postOrderTraverse();
     }
-    System.out.println(value);
+    // System.out.println(value);
   }
 
   public void insert(BinaryTree node) {

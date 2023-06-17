@@ -1,11 +1,12 @@
 package cn.edu.thssdb.index;
 
+import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.utils.Global;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-abstract class BPlusTreeNode<K extends Comparable<K>, V> {
+abstract class BPlusTreeNode<K extends Comparable<K>, V extends Row> {
   ArrayList<K> keys;
   int nodeSize;
 
@@ -54,5 +55,5 @@ abstract class BPlusTreeNode<K extends Comparable<K>, V> {
     nodeSize--;
   }
 
-  //    abstract BPlusTreeLeafNode<K, V> getLeafNode(K key);
+  abstract BPlusTreeLeafNode<K, V> getLeafNode(K key);
 }

@@ -41,7 +41,7 @@ public class Database {
     Table table = new Table(this.databaseName, tableName, columns, primaryIndex);
     this.tables.put(tableName, table);
     persist(tableName);
-    System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
+    // System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
   }
 
   // TODO: need database lock
@@ -51,13 +51,13 @@ public class Database {
     }
     tables.remove(tableName);
     dropTablePersist(tableName);
-    System.out.println("[DEBUG] " + "Table " + tableName + " is dropped.");
+    // System.out.println("[DEBUG] " + "Table " + tableName + " is dropped.");
   }
 
   // TODO: need database lock
   public String getTables() {
     String tableNameList = "";
-    System.out.println("[DEBUG] " + "Table count: " + tables.values().size());
+    // System.out.println("[DEBUG] " + "Table count: " + tables.values().size());
     int i = 0;
     int n = tables.values().size() - 2;
     for (Table table : tables.values()) {

@@ -1,11 +1,13 @@
 package cn.edu.thssdb.index;
 
+import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.utils.Pair;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class BPlusTreeIterator<K extends Comparable<K>, V> implements Iterator<Pair<K, V>> {
+public class BPlusTreeIterator<K extends Comparable<K>, V extends Row>
+    implements Iterator<Pair<K, V>> {
   private final LinkedList<BPlusTreeNode<K, V>> queue;
   private final LinkedList<Pair<K, V>> buffer;
 

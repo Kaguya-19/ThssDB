@@ -18,7 +18,7 @@ public class Logger {
       File logFile = new File(logPath);
       if (!logFile.exists()) logFile.createNewFile();
       writer = new FileWriter(logFile, true);
-      System.out.println("init log");
+      // System.out.println("init log");
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -28,7 +28,7 @@ public class Logger {
     try {
       writer.write(log + '\n');
       writer.flush();
-      System.out.println("write log " + log);
+      // System.out.println("write log " + log);
     } catch (IOException e) {
       System.out.println("write log error");
       e.printStackTrace();
@@ -52,12 +52,13 @@ public class Logger {
 
   public void cleanLog() {
     try {
-      File logFile = new File(logPath);
-      // clear the file
       writer.close();
-      writer = new FileWriter(logFile);
+      writer = new FileWriter(logPath);
       writer.write("");
-      System.out.println("clean log");
+      writer.close();
+      writer = new FileWriter(logPath, true);
+      // clear the file
+      // System.out.println("clean log");
     } catch (IOException e) {
       e.printStackTrace();
     }

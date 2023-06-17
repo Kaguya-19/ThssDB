@@ -12,7 +12,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -31,9 +30,9 @@ public class Manager {
     // TODO:Stroage by page
     databases = new ConcurrentHashMap<>();
     loadedDatabase = null;
-    System.out.println("[DEBUG] " + "Recovering meta data");
+    // System.out.println("[DEBUG] " + "Recovering meta data");
     recover();
-    System.out.println("[DEBUG] " + "Meta data recovered");
+    // System.out.println("[DEBUG] " + "Meta data recovered");
     for (Database db : databases.values()) {
       System.out.println(db.getDatabaseStructure());
     }
@@ -43,7 +42,7 @@ public class Manager {
     if (!databases.containsKey(databaseName)) {
       Database database = new Database(databaseName);
       databases.put(databaseName, database);
-      System.out.println("[DEBUG] " + "Database created");
+      // System.out.println("[DEBUG] " + "Database created");
       if (record) persist(databaseName);
 
       if (loadedDatabase == null) {
@@ -51,7 +50,7 @@ public class Manager {
         return true;
       }
     } else {
-      System.out.println("[DEBUG] " + "Database existed!");
+      // System.out.println("[DEBUG] " + "Database existed!");
       throw new DuplicateDatabaseException(databaseName);
     }
     return false;
@@ -64,14 +63,14 @@ public class Manager {
     Database db = databases.remove(databaseName);
     db.logger.closeLog();
     if (loadedDatabase.equals(databaseName)) loadedDatabase = null;
-    System.out.println("[DEBUG] " + "Database dropped");
+    // System.out.println("[DEBUG] " + "Database dropped");
     dropDatabaseDir(databaseName);
   }
 
   public void switchDatabase(String databaseName) {
     if (databases.containsKey(databaseName)) {
       loadedDatabase = databaseName;
-      System.out.println("[DEBUG] " + "Database " + loadedDatabase + " is activated.");
+      // System.out.println("[DEBUG] " + "Database " + loadedDatabase + " is activated.");
     } else {
       throw new DatabaseNotExistException(databaseName);
     }
@@ -96,7 +95,7 @@ public class Manager {
 
   public String getAllDatabase() {
     String dbNameList = "";
-    System.out.println("[DEBUG] " + "db count: " + databases.values().size());
+    // System.out.println("[DEBUG] " + "db count: " + databases.values().size());
     int i = 0;
     int n = databases.values().size() - 2;
     for (Database db : databases.values()) {

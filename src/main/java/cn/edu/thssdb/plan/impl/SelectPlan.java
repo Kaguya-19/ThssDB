@@ -63,7 +63,7 @@ public class SelectPlan extends LogicalPlan {
           joinTable.releaseReadLockIfReadCommitted(lockManager, "joinTable");
         }
       } else {
-        System.out.println("No join table used.");
+        // System.out.println("No join table used.");
       }
       this.queryTables.add(queryTable);
       table.releaseReadLockIfReadCommitted(lockManager, "generateQueryTable");
