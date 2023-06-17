@@ -63,4 +63,13 @@ public class Logger {
       e.printStackTrace();
     }
   }
+
+  public void closeLog() {
+    try {
+      writer.close();
+      writer = null;
+    } catch (IOException e) {
+
+    }
+  }
 }
