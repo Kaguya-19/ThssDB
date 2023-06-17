@@ -53,11 +53,10 @@ public class Logger {
   public void cleanLog() {
     try {
       File logFile = new File(logPath);
+      // clear the file
       writer.close();
       writer = new FileWriter(logFile);
       writer.write("");
-      writer.close();
-      writer = new FileWriter(logFile);
       System.out.println("clean log");
     } catch (IOException e) {
       e.printStackTrace();

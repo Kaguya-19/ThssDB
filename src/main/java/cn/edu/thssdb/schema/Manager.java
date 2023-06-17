@@ -157,12 +157,24 @@ public class Manager {
 
   private void dropDatabaseDir(String databaseName) {
     String folderPath = Global.MANAGER_DIR.concat(databaseName);
+    String tablePath = Global.TABLE_DIR.concat(databaseName);
     try {
       Path directory = Paths.get(folderPath);
+
+      // delete directory recursively
       Files.walk(directory)
           .sorted(java.util.Comparator.reverseOrder())
           .map(Path::toFile)
           .forEach(File::delete);
+      Path tableDir = Paths.get(tablePath);
+      if (Files.exists((tableDir))) {
+        Files.walk(tableDir)
+            .sorted(java.util.Comparator.reverseOrder())
+            .map(Path::toFile)
+            .forEach(File::delete);
+        //      Files.deleteIfExists(directory);
+        Files.deleteIfExists(tableDir);
+      }
 
       String managerScriptPath = Global.MANAGER_DIR.concat("manager.script");
       String pattern = "CREATE DATABASE ".concat(databaseName);

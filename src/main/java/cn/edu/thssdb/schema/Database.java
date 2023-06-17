@@ -13,19 +13,19 @@ import cn.edu.thssdb.plan.impl.UpdatePlan;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Database {
 
   private String databaseName; // check legal name
-  private HashMap<String, Table> tables;
+  private ConcurrentHashMap<String, Table> tables;
   private static ReentrantReadWriteLock lock;
   public Logger logger;
 
   public Database(String databaseName) {
     this.databaseName = databaseName;
-    this.tables = new HashMap<>();
+    this.tables = new ConcurrentHashMap<>();
     this.lock = new ReentrantReadWriteLock();
     this.logger =
         new Logger(Global.MANAGER_DIR.concat(databaseName + File.separator), databaseName);
@@ -39,7 +39,7 @@ public class Database {
     }
     columns[primaryIndex].setPrimary();
     Table table = new Table(this.databaseName, tableName, columns, primaryIndex);
-    tables.put(tableName, table);
+    this.tables.put(tableName, table);
     persist(tableName);
     System.out.println("[DEBUG] " + "Table " + tableName + " is created.");
   }

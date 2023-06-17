@@ -132,7 +132,7 @@ public class IServiceHandler implements IService.Iface {
           try {
             Database db = manager.getCurrentDatabase();
             ((InsertPlan) plan).doInsert(lockManager, db);
-            db.logger.writeLog(req.statement);
+            if (lockManager.transactionStarted()) db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -147,7 +147,7 @@ public class IServiceHandler implements IService.Iface {
           try {
             Database db = manager.getCurrentDatabase();
             ((DeletePlan) plan).doDelete(lockManager, db);
-            db.logger.writeLog(req.statement);
+            if (lockManager.transactionStarted()) db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -160,7 +160,7 @@ public class IServiceHandler implements IService.Iface {
           try {
             Database db = manager.getCurrentDatabase();
             ((UpdatePlan) plan).doUpdate(lockManager, db);
-            db.logger.writeLog(req.statement);
+            if (lockManager.transactionStarted()) db.logger.writeLog(req.statement);
           } catch (Exception e) {
             isInterrupted = true;
             msg = e.getMessage();
@@ -216,7 +216,11 @@ public class IServiceHandler implements IService.Iface {
     if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
       System.out.println("Auto commit.");
       lockManager.commit();
-      manager.getCurrentDatabase().logger.cleanLog();
+      //      try {
+      //        manager.getCurrentDatabase().logger.cleanLog();
+      //      } catch (Exception e) {
+      //        System.out.println("Log write failed.");
+      //      }
     }
 
     if (isInterrupted) {
