@@ -5,6 +5,8 @@ import cn.edu.thssdb.schema.Table;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class BufferManager {
@@ -17,7 +19,7 @@ public class BufferManager {
   ArrayList<ArrayList<Row>> buffer = new ArrayList<>();
   ArrayList<Integer> bufferPageIndex = new ArrayList<>();
 
-  ArrayList<Boolean> writeFlag = new ArrayList<>();
+  List<Boolean> writeFlag = Collections.synchronizedList(new ArrayList<Boolean>());
 
   public BufferManager(Table table) {
     tableName = table.tableName;
