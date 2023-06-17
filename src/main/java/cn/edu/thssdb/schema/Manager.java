@@ -60,7 +60,8 @@ public class Manager {
     if (!databases.containsKey(databaseName)) {
       throw new DatabaseNotExistException(databaseName);
     }
-    databases.remove(databaseName);
+    Database db = databases.remove(databaseName);
+    db.logger.closeLog();
     if (loadedDatabase.equals(databaseName)) loadedDatabase = null;
     System.out.println("[DEBUG] " + "Database dropped");
     dropDatabaseDir(databaseName);
@@ -116,40 +117,16 @@ public class Manager {
       if (!scriptFile.exists()) {
         scriptFile.createNewFile();
       }
-      // FileOutputStream fos = new FileOutputStream(managerScriptPath);
       BufferedWriter writer = new BufferedWriter(new FileWriter(managerScriptPath, true));
       writer.write("CREATE DATABASE ".concat(databaseName + "\n"));
-
-      //      String dirPath = Global.MANAGER_DIR.concat(databaseName);
-      //      File dir = new File(dirPath);
-      //      if (!dir.exists()) dir.mkdirs();
 
       String dbScriptPath =
           Global.MANAGER_DIR.concat(databaseName + File.separator + databaseName + ".script");
       File dbScript = new File(dbScriptPath);
       if (!dbScript.getParentFile().exists()) dbScript.getParentFile().mkdirs();
       if (!dbScript.exists()) dbScript.createNewFile();
-
-      // only add current db
-      //      for (String db : databases.keySet()) {
-      //        writer.write("create database ".concat(db + "\n"));
-      //        // create a folder for database
-      //        String dirPath = Global.MANAGER_DIR.concat(db);
-      //        File dir = new File(dirPath);
-      //        if (dir.exists()) {
-      //          //          System.out.println("Database folder created.");
-      //        } else {
-      //          dir.mkdirs();
-      //        }
-      //        // create empty .script file
-      //        String dbScriptPath = Global.MANAGER_DIR.concat(db + File.separator + db +
-      // ".script");
-      //        File dbScript = new File(dbScriptPath);
-      //        if (!dbScript.exists()) dbScript.createNewFile();
-      //      }
-      // writer.flush();
       writer.close();
-      // fos.close();
+
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -175,6 +152,12 @@ public class Manager {
         //      Files.deleteIfExists(directory);
         Files.deleteIfExists(tableDir);
       }
+      File deleteFile = new File(folderPath + File.separator + databaseName + ".log");
+      if (deleteFile.exists()) deleteFile.delete();
+      deleteFile = new File(folderPath + File.separator + databaseName + ".script");
+      if (deleteFile.exists()) deleteFile.delete();
+      deleteFile = new File(folderPath);
+      if (deleteFile.exists()) deleteFile.delete();
 
       String managerScriptPath = Global.MANAGER_DIR.concat("manager.script");
       String pattern = "CREATE DATABASE ".concat(databaseName);
@@ -203,13 +186,8 @@ public class Manager {
         System.out.println("Failed to delete the original file.");
       }
 
-      System.out.println("Folder and its contents deleted successfully.");
+//      System.out.println("Folder and its contents deleted successfully.");
     } catch (IOException e) {
-      e.printStackTrace();
-    }
-    try {
-
-    } catch (Exception e) {
       e.printStackTrace();
     }
   }
