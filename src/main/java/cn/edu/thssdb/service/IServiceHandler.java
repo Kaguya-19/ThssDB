@@ -24,6 +24,7 @@ import cn.edu.thssdb.utils.StatusUtil;
 import org.apache.thrift.TException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 // import cn.edu.thssdb.schema.Database; //?
@@ -32,11 +33,11 @@ public class IServiceHandler implements IService.Iface {
 
   private static final AtomicInteger sessionCnt = new AtomicInteger(0);
   private final Manager manager;
-  private final Map<Long, LockManager> lockManagerList;
+  private final ConcurrentHashMap<Long, LockManager> lockManagerList;
 
   public IServiceHandler() {
     manager = Manager.getInstance();
-    lockManagerList = new HashMap<>();
+    lockManagerList = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -54,6 +55,14 @@ public class IServiceHandler implements IService.Iface {
 
   @Override
   public DisconnectResp disconnect(DisconnectReq req) throws TException {
+    LockManager lockManager;
+    lockManagerList.computeIfAbsent(req.sessionId, LockManager::new);
+    lockManager = lockManagerList.get(req.sessionId);
+    if (lockManager == null) {
+      return new DisconnectResp(StatusUtil.fail("You are not connected. Please connect first."));
+    }
+    lockManager.commit();
+    lockManagerList.remove(req.sessionId);
     return new DisconnectResp(StatusUtil.success());
   }
 
@@ -205,6 +214,12 @@ public class IServiceHandler implements IService.Iface {
           msg = "Transaction isolation mode switch to: " + lockManager.getMode();
           break;
 
+        case QUIT:
+          lockManager.commit();
+          manager.getCurrentDatabase().logger.cleanLog();
+          msg = "quit";
+          break;
+
         default:
       }
     } catch (Exception e) {
@@ -216,7 +231,7 @@ public class IServiceHandler implements IService.Iface {
     if (!lockManager.transactionStarted() && plan.getType() != LogicalPlan.LogicalPlanType.COMMIT) {
       System.out.println("Auto commit.");
       lockManager.commit();
-//      manager.getCurrentDatabase().logger.cleanLog();
+      //      manager.getCurrentDatabase().logger.cleanLog();
     }
 
     if (isInterrupted) {
@@ -226,9 +241,11 @@ public class IServiceHandler implements IService.Iface {
     }
 
     // TODO: release all lock in lock manager before return
+//    lockManager.commit();
 
     return null;
     //    return new ExecuteStatementResp(StatusUtil.fail("Unknown statement, please try again."),
     // false);
   }
+
 }

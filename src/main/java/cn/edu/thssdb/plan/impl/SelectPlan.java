@@ -20,6 +20,8 @@ public class SelectPlan extends LogicalPlan {
   private QueryTable queryTable;
   private QueryResult queryResult;
 
+  Boolean isLeftPK = false;
+
   public SelectPlan(
       ArrayList<ColumnFullName> resultColumns,
       ArrayList<TableQuery> tableQueries,
@@ -40,7 +42,15 @@ public class SelectPlan extends LogicalPlan {
       }
       table.useReadLock(lockManager, "generateQueryTable");
 
-      QueryTable queryTable = new QueryTable(lockManager, table);
+      QueryTable queryTable;
+
+      if (conditions != null
+          && conditions.isLeftPK(table.getColumnNames().get(table.getPrimaryIndex()))) {
+        queryTable = new QueryTable(lockManager, table, conditions);
+        isLeftPK = true;
+      } else {
+        queryTable = new QueryTable(lockManager, table);
+      }
       if (tableQuery.getJoinTableNames() != null) {
         for (String tableName : tableQuery.getJoinTableNames()) {
           Table joinTable = database.getTableByName(tableName);
@@ -67,6 +77,9 @@ public class SelectPlan extends LogicalPlan {
 
   public QueryResult doSelect(LockManager lockManager, Database database) {
     generateQueryTable(lockManager, database);
+    if (isLeftPK) {
+      conditions = null;
+    }
     return new QueryResult(lockManager, queryTable, resultColumns, conditions);
     // Print the result
   }

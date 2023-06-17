@@ -2,6 +2,7 @@ package cn.edu.thssdb.schema;
 
 import cn.edu.thssdb.Global;
 import cn.edu.thssdb.LockManager;
+import cn.edu.thssdb.exception.KeyNotExistException;
 import cn.edu.thssdb.index.BPlusTree;
 import cn.edu.thssdb.utils.Pair;
 
@@ -29,6 +30,16 @@ public class Table implements Iterable<Row> {
     this.primaryIndex = primaryIndex;
     // TODO
     this.tablePath = Global.TABLE_DIR + databaseName + File.separator + tableName + ".table";
+  }
+
+  public Row getRowByPrimaryIndex(Entry key) {
+    try {
+      return this.index.get(key);
+      //      System.out.println("[GET RESULT] " + rows.size());
+    } catch (KeyNotExistException e) {
+      //      e.printStackTrace();
+      return null;
+    }
   }
 
   public void persist() {
@@ -167,18 +178,24 @@ public class Table implements Iterable<Row> {
   }
 
   public void useReadLock(LockManager lockManager, String user) {
-    if (lock.getReadHoldCount() == 0) {
-      //      System.out.println(this.hashCode() + " wait for read lock.");
-      lock.readLock().lock();
-      lockManager.recordLock(this.hashCode(), lock);
-      //      System.out.println(this.hashCode() + " " + user + " get read lock. Read lock hold: " +
-      // lock.getReadHoldCount());
-    } else {
-      //      System.out.println(
-      //              this.hashCode() + " " + user + " has this read lock. Read lock hold: " +
-      // lock.getReadHoldCount());
-      //      lockManager.recordLock(this.hashCode(), lock);
+    if (!lock.readLock().tryLock())
+    {
+        lock.readLock().lock();
+        lockManager.recordLock(this.hashCode(), lock);
+
     }
+//    if (lock.getReadHoldCount() == 0) {
+//      //      System.out.println(this.hashCode() + " wait for read lock.");
+//      lock.readLock().lock();
+//      lockManager.recordLock(this.hashCode(), lock);
+//      //      System.out.println(this.hashCode() + " " + user + " get read lock. Read lock hold: " +
+//      // lock.getReadHoldCount());
+//    } else {
+//      //      System.out.println(
+//      //              this.hashCode() + " " + user + " has this read lock. Read lock hold: " +
+//      // lock.getReadHoldCount());
+//      //      lockManager.recordLock(this.hashCode(), lock);
+//    }
   }
 
   public void releaseReadLockIfReadCommitted(LockManager lockManager, String user) {

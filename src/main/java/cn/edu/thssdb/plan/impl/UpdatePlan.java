@@ -41,18 +41,36 @@ public class UpdatePlan extends LogicalPlan {
   public void doUpdate(LockManager lockManager, Database database) {
     Table table = database.getTableByName(tableName);
     ArrayList<Entry> entries = new ArrayList<>();
-    for (Iterator<Row> it = table.iterator(); it.hasNext(); ) {
-      Row row = it.next();
-      if (conditions != null) {
-        if (conditions.check(row, table)) {
+    if (conditions != null
+        && conditions.isLeftPK(table.getColumnNames().get(table.getPrimaryIndex()))) {
+      Entry entry =
+          new Entry(
+              (Comparable)
+                  conditions.getValue(
+                      table.getColumnByName(
+                          table.getColumns().get(table.getPrimaryIndex()).getName())));
+      Row row = table.getRowByPrimaryIndex(entry);
+      if (row != null) {
+        Row newRow = new Row(row);
+        newRow.update(columnName, value, table);
+        table.update(lockManager, row, newRow);
+        return;
+      }
+    } else {
+
+      for (Iterator<Row> it = table.iterator(); it.hasNext(); ) {
+        Row row = it.next();
+        if (conditions != null) {
+          if (conditions.check(row, table)) {
+            Row newRow = new Row(row);
+            newRow.update(columnName, value, table);
+            table.update(lockManager, row, newRow);
+          }
+        } else {
           Row newRow = new Row(row);
           newRow.update(columnName, value, table);
           table.update(lockManager, row, newRow);
         }
-      } else {
-        Row newRow = new Row(row);
-        newRow.update(columnName, value, table);
-        table.update(lockManager, row, newRow);
       }
     }
   }

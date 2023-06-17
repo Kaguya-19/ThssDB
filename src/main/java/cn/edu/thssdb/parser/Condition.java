@@ -237,4 +237,24 @@ public class Condition {
         return false;
     }
   }
+
+  //  public boolean isBothPK() {
+  //    return c1.isPK() && c2.isPK();
+  //  }
+
+  public ColumnFullName getC1() {
+    return c1;
+  }
+
+  public ColumnFullName getC2() {
+    return c2;
+  }
+
+  public String getOp() {
+    return op;
+  }
+
+  public Object getValue(Column column) {
+    return getEntryByType((String) value, column.getType());
+  }
 }

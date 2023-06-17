@@ -9,10 +9,12 @@ public class MetaInfo {
 
   private String tableName;
   private List<Column> columns;
+  private int primaryIndex = -1;
 
-  MetaInfo(String tableName, ArrayList<Column> columns) {
+  MetaInfo(String tableName, ArrayList<Column> columns, int primaryIndex) {
     this.tableName = tableName;
     this.columns = columns;
+    this.primaryIndex = primaryIndex;
   }
 
   int columnFind(String name) {

@@ -6,15 +6,19 @@ import cn.edu.thssdb.schema.Table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class LockManager {
 
   public Long sessionId;
 
-  public Map<Integer, ReentrantReadWriteLock> lockTable = new HashMap<>();
+  public ConcurrentHashMap<Integer, ReentrantReadWriteLock> lockTable = new ConcurrentHashMap<>();
   private ArrayList<Table> tableList;
-  private Boolean transactionOnProcess = false;
+
+  // make this safe for concurrent access
+  private AtomicBoolean transactionOnProcess = new AtomicBoolean(false);
   private Boolean transactionMode = false; // true for serializable, false for read committed
 
   public LockManager(Long sessionId) {
@@ -34,7 +38,7 @@ public class LockManager {
   }
 
   public void beginTransaction() {
-    transactionOnProcess = true;
+    transactionOnProcess.set(true);
   }
 
   public void setTransactionMode(boolean mode) {
@@ -74,11 +78,11 @@ public class LockManager {
     }
     lockTable.clear();
     tableList.clear();
-    transactionOnProcess = false;
+    transactionOnProcess.set(false);
   }
 
   public boolean transactionStarted() {
-    return transactionOnProcess;
+    return transactionOnProcess.get();
   }
 
   public boolean isSerializable() {

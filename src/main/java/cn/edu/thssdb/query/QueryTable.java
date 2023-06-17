@@ -3,6 +3,7 @@ package cn.edu.thssdb.query;
 import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.schema.Column;
+import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 
@@ -17,6 +18,7 @@ public class QueryTable implements Iterator<Row> {
   public ArrayList<Row> resultTable = new ArrayList<>();
 
   public ArrayList<Column> originColumns = new ArrayList<>();
+  public int originPrimaryKey = -1;
   public ArrayList<Column> resultColumns;
 
   private String originTableName;
@@ -31,6 +33,7 @@ public class QueryTable implements Iterator<Row> {
       column.setTableName(originTable.getTableName());
     }
     originTableName = originTable.getTableName();
+    originPrimaryKey = originTable.getPrimaryIndex();
     //    this.resultTable =
     //        new Table(
     //            null, originTableName, columns.toArray(new Column[0]),
@@ -47,6 +50,43 @@ public class QueryTable implements Iterator<Row> {
     this.iterator = resultTable.iterator();
   }
 
+  public QueryTable(LockManager lockManager, Table originTable, MultipleConditions conditions) {
+    originColumns.addAll(originTable.getColumns());
+    for (Column column : originColumns) {
+      column.setTableName(originTable.getTableName());
+    }
+    originTableName = originTable.getTableName();
+    originPrimaryKey = originTable.getPrimaryIndex();
+    //    this.resultTable =
+    //        new Table(
+    //            null, originTableName, columns.toArray(new Column[0]),
+    // originTable.getPrimaryIndex());
+    this.useWriteLock(lockManager, "resultTable");
+    if (originTable.getRowByPrimaryIndex(
+            new Entry(
+                (Comparable)
+                    conditions.getValue(
+                        originTable.getColumnByName(
+                            originTable
+                                .getColumns()
+                                .get(originTable.getPrimaryIndex())
+                                .getName()))))
+        != null) {
+      resultTable.add(
+          originTable.getRowByPrimaryIndex(
+              new Entry(
+                  (Comparable)
+                      conditions.getValue(
+                          originTable.getColumnByName(
+                              originTable
+                                  .getColumns()
+                                  .get(originTable.getPrimaryIndex())
+                                  .getName())))));
+    }
+    resultColumns = originColumns;
+    this.iterator = resultTable.iterator();
+  }
+
   public void join(LockManager lockManager, QueryTable queryTable, MultipleConditions conditions) {
     // TODO
     ArrayList<Column> columns = new ArrayList<>();
@@ -54,15 +94,18 @@ public class QueryTable implements Iterator<Row> {
     String joinTableName = queryTable.originTableName;
     //    ArrayList<Column> originColumns = resultTable.getColumns();
     ArrayList<Column> joinColumns = queryTable.originColumns;
+    int joinPrimaryKey = queryTable.originPrimaryKey;
     for (Column column : joinColumns) {
       column.setTableName(joinTableName);
     }
-    MetaInfo originMetaInfo = new MetaInfo(originTableName, originColumns);
-    MetaInfo joinMetaInfo = new MetaInfo(joinTableName, joinColumns);
+    MetaInfo originMetaInfo = new MetaInfo(originTableName, originColumns, originPrimaryKey);
+    MetaInfo joinMetaInfo = new MetaInfo(joinTableName, joinColumns, joinPrimaryKey);
     columns.addAll(originColumns);
     columns.addAll(joinColumns);
     QueryTable _resultTable = new QueryTable(lockManager);
     _resultTable.useWriteLock(lockManager, "join");
+    // 1. is there a primary key then find by binary search
+
     // 2. filter rows
     for (Row originRow : resultTable) {
       for (Row joinRow : queryTable.resultTable) {
@@ -88,8 +131,9 @@ public class QueryTable implements Iterator<Row> {
     String joinTableName = table.getTableName();
     //    ArrayList<Column> originColumns = resultTable.getColumns();
     ArrayList<Column> joinColumns = table.getColumns();
-    MetaInfo originMetaInfo = new MetaInfo(originTableName, originColumns);
-    MetaInfo joinMetaInfo = new MetaInfo(joinTableName, joinColumns);
+    int joinPrimaryKey = table.getPrimaryIndex();
+    MetaInfo originMetaInfo = new MetaInfo(originTableName, originColumns, originPrimaryKey);
+    MetaInfo joinMetaInfo = new MetaInfo(joinTableName, joinColumns, joinPrimaryKey);
     for (Column column : joinColumns) {
       column.setTableName(joinTableName);
     }
@@ -98,14 +142,37 @@ public class QueryTable implements Iterator<Row> {
     QueryTable _resultTable = new QueryTable(lockManager);
     _resultTable.useWriteLock(lockManager, "join");
     // 2. filter rows
-    for (Row originRow : resultTable) {
-      for (Row joinRow : table) {
-        if (conditions == null
-            || conditions.check(originRow, joinRow, originMetaInfo, joinMetaInfo)) {
+    // 1. are all primary keys?
+    Boolean isAllPrimaryKeys = false;
+    // TODO: different sequence
+    if (conditions != null) {
+      isAllPrimaryKeys =
+          conditions.isBothPK(
+              originColumns.get(originPrimaryKey).getName(),
+              joinColumns.get(joinPrimaryKey).getName());
+    }
+
+    if (isAllPrimaryKeys)
+    // use binary search
+    {
+      for (Row row : resultTable) {
+        if (table.getRowByPrimaryIndex(row.getEntries().get(originPrimaryKey)) != null) {
           Row newRow = new Row();
-          newRow.addAll(originRow);
-          newRow.addAll(joinRow);
+          newRow.addAll(row);
+          newRow.addAll(table.getRowByPrimaryIndex(row.getEntries().get(originPrimaryKey)));
           _resultTable.resultTable.add(newRow);
+        }
+      }
+    } else {
+      for (Row originRow : resultTable) {
+        for (Row joinRow : table) {
+          if (conditions == null
+              || conditions.check(originRow, joinRow, originMetaInfo, joinMetaInfo)) {
+            Row newRow = new Row();
+            newRow.addAll(originRow);
+            newRow.addAll(joinRow);
+            _resultTable.resultTable.add(newRow);
+          }
         }
       }
     }

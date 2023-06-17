@@ -4,7 +4,7 @@ import cn.edu.thssdb.utils.Pair;
 
 public final class BPlusTree<K extends Comparable<K>, V> implements Iterable<Pair<K, V>> {
 
-  BPlusTreeNode<K, V> root;
+  public BPlusTreeNode<K, V> root;
   private int size;
 
   public BPlusTree() {
@@ -56,6 +56,11 @@ public final class BPlusTree<K extends Comparable<K>, V> implements Iterable<Pai
       root = newRoot;
     }
   }
+
+  //  public BPlusTreeLeafNode<K, V> getLeafNode(K key) {
+  //    if (key == null) throw new IllegalArgumentException("argument key to get() is null");
+  //    return root.getLeafNode(key);
+  //  }
 
   @Override
   public BPlusTreeIterator<K, V> iterator() {

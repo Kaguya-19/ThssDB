@@ -4,6 +4,7 @@ import cn.edu.thssdb.LockManager;
 import cn.edu.thssdb.parser.MultipleConditions;
 import cn.edu.thssdb.plan.LogicalPlan;
 import cn.edu.thssdb.schema.Database;
+import cn.edu.thssdb.schema.Entry;
 import cn.edu.thssdb.schema.Row;
 import cn.edu.thssdb.schema.Table;
 
@@ -33,10 +34,24 @@ public class DeletePlan extends LogicalPlan {
     if (table == null) {
       throw new RuntimeException("Table not found!");
     }
-    for (Iterator<Row> it = table.iterator(); it.hasNext(); ) {
-      Row row = it.next();
-      if (conditions == null || conditions.check(row, table)) {
+    if (conditions != null
+        && conditions.isLeftPK(table.getColumnNames().get(table.getPrimaryIndex()))) {
+      Entry entry =
+          new Entry(
+              (Comparable)
+                  conditions.getValue(
+                      table.getColumnByName(table.getColumnNames().get(table.getPrimaryIndex()))));
+      Row row = table.getRowByPrimaryIndex(entry);
+      if (row != null) {
         table.delete(lockManager, row);
+        return;
+      }
+    } else {
+      for (Iterator<Row> it = table.iterator(); it.hasNext(); ) {
+        Row row = it.next();
+        if (conditions == null || conditions.check(row, table)) {
+          table.delete(lockManager, row);
+        }
       }
     }
   }

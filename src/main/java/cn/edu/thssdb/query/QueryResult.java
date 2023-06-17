@@ -28,7 +28,6 @@ public class QueryResult {
     this.resultTable = new QueryTable(lockManager);
 
     resultTable.useWriteLock(lockManager, "QueryTable");
-
     for (Iterator<Row> iterator = queryTable.iterator(); iterator.hasNext(); ) {
       //      ArrayList<Entry> entries = new ArrayList<>();
       Row row = iterator.next();

@@ -13,11 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Manager {
   // TODO: MetaData Should change in one database one file
-  private HashMap<String, Database> databases;
+  private ConcurrentHashMap<String, Database> databases;
   private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
   public static Manager getInstance() {
@@ -28,7 +29,7 @@ public class Manager {
 
   public Manager() {
     // TODO:Stroage by page
-    databases = new HashMap<>();
+    databases = new ConcurrentHashMap<>();
     loadedDatabase = null;
     System.out.println("[DEBUG] " + "Recovering meta data");
     recover();
@@ -186,7 +187,7 @@ public class Manager {
         System.out.println("Failed to delete the original file.");
       }
 
-//      System.out.println("Folder and its contents deleted successfully.");
+      //      System.out.println("Folder and its contents deleted successfully.");
     } catch (IOException e) {
       e.printStackTrace();
     }

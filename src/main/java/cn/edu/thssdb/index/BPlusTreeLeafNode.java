@@ -93,4 +93,12 @@ public class BPlusTreeLeafNode<K extends Comparable<K>, V> extends BPlusTreeNode
     nodeSize = index + length;
     next = node.next;
   }
+
+  //  @Override
+  //  BPlusTreeLeafNode<K, V> getLeafNode(K key) {
+  //    int index = binarySearch(key);
+  //    if (index >= 0) return this;
+  //    //    System.out.println(this.keys.toString() + "---" +  key.toString());
+  //    throw new KeyNotExistException();
+  //  }
 }

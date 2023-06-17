@@ -72,4 +72,22 @@ public class MultipleConditions extends BinaryTree {
   public boolean check(Row row, ArrayList<Row> table, ArrayList<Column> columns) {
     return postOrderTraverse(row, table, columns);
   }
+
+  public Object getValue(Column column) {
+    return ((Condition) value).getValue(column);
+  }
+
+  public boolean isBothPK(String c1PK, String c2PK) {
+    return isLeaf()
+        && (((Condition) value).getC1().getColumnName().equals(c1PK))
+        && (((Condition) value).getC2().getColumnName().equals(c2PK))
+        && ((Condition) value).getOp().equals("=");
+  }
+
+  public boolean isLeftPK(String c1PK) {
+    return isLeaf()
+        && (((Condition) value).getC1().getColumnName().equals(c1PK))
+        && ((Condition) value).getC2() == null
+        && ((Condition) value).getOp().equals("="); // TODO: more conditions
+  }
 }
